@@ -1,0 +1,126 @@
+* {
+    margin: 0;
+    padding: 0;
+    font-size: 14px;
+    box-sizing: border-box;
+}
+
+html, body {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    background: url("../img/login.jpg") left top no-repeat;
+    background-size: 100% 30vh;
+    color: #fff;
+}
+h1{
+    padding-top: 10vh;
+    text-align: center;
+    font-size: 4vw;
+}
+.box {
+    position: absolute;
+    top: 10%;
+    left: 5%;
+    width: 90%;
+    min-width: 220px;
+    padding: 20px 10px;
+    box-sizing: border-box;
+}
+
+
+.box input {
+    display: block;
+    width: 97%;
+    height: 42px;
+    line-height: 42px;
+    margin: 10px auto;
+    border-radius: 21px;
+    border: 1px solid silver;
+    background-color: #fff;
+    padding: 0 3.6vw;
+    box-sizing: border-box;
+}
+
+ .box .host,.box .device {
+    position: relative;
+}
+.box .device:before,
+.box .host:before {
+    content: "";
+    position: absolute;
+    width: 32px;
+    height: 32px;
+    top: 4px;
+    left: 1.6vw;
+    border-radius: 100% 0 0 100%;
+    background: url("../img/icon1.fw.png") 6px center no-repeat;
+    background-size: auto 80%;
+    overflow: hidden;
+}
+
+.box .host:before {
+    background: url("../img/icon1.fw.png") -20px center no-repeat;
+    background-size: auto 80%;
+}
+.box .device:before {
+    background: url(../img/icon1.fw.png) -48px center no-repeat;
+    background-size: auto 80%;
+}
+
+.box input[type=button] {
+    margin-top: 30px;
+    width: 60%;
+    background: #5bb49e;
+    color: #fff;
+}
+
+.box > div {
+    margin-top: 20vh;
+    border: 1px solid #d5d3d4;
+    border-radius: 6px;
+    padding-bottom: 10px;
+    position: relative;
+}
+
+.box .warn {
+    position: absolute;
+    top: -26px;
+    left: 0;
+    width: 100%;
+    height: 20px;
+    line-height: 20px;
+    background-color: #f7d8d7;
+    display: none;
+}
+
+.box .warn span {
+    position: absolute;
+    left: 20px;
+    top: 2px;
+    display: block;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background-color: #d8281c;
+}
+
+.box .warn span:before {
+    content: "";
+    display: block;
+    width: 12px;
+    height: 2px;
+    background-color: #fff;
+    position: absolute;
+    top: 7px;
+    left: 2px;
+}
+
+.box .warn p {
+    padding-left: 50px;
+    font-size: 12px;
+    color: #d72420;
+}
+.warnborder{
+    border: 2px solid #d8281c!important;
+}

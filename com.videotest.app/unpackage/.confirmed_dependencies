@@ -1,0 +1,13 @@
+{
+  "page/login.html": {
+    "refer": [
+      "index.html"
+    ],
+    "resources": []
+  },
+  "index.html": {
+    "refer": [
+      "page/login.html"
+    ]
+  }
+}

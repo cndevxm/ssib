@@ -1,0 +1,69 @@
+<html lang="en">
+
+	<head>
+		<!--<meta http-equiv="Content-Security-Policy" content="default-src 'self' data: gap: https://ssl.gstatic.com 'unsafe-eval'; style-src 'self' 'unsafe-inline'; media-src *; img-src 'self' data: content:;">-->
+		<meta charset="UTF-8">
+		<meta name="format-detection" content="telephone=no">
+		<meta name="msapplication-tap-highlight" content="no">
+		<meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width">
+		<link rel="stylesheet" type="text/css" href="../css/login.css">
+		<title>设置</title>
+	</head>
+
+	<body>
+		<h1>设   置</h1>
+		<div class="box">
+			<div>
+				<div class="device"><input type="text" placeholder="请输入设备编号" id="deviceNo" value="180800001"></div>
+				<div class="host"><input type="text" placeholder="请输入服务器地址" id="host" value="http://ssib.gzncloud.com"></div>
+				<div class="warn">
+					<span></span>
+					<p>设备号和服务器地址不能为空</p>
+				</div>
+			</div>
+			<input type="button" value="确定" onclick="startReplenish()">
+		</div>
+	</body>
+	<script type="text/javascript" src="../js/jquery.min.js"></script>
+	<script src="../js/common.js"></script>
+	<script>
+		var host = "http://ssib.gzncloud.com";
+		var deviceNo = "";
+		var baseImagePath = "";
+		console.log(localStorage.getItem("deviceNo"))
+		console.log(localStorage.getItem("host"))
+		var timer = setTimeout(function() {
+			if(localStorage.getItem("deviceNo") && localStorage.getItem("host")) {
+				clearTimeout(timer);
+				window.location.href = "../index.html";
+			} else {
+				$(".box .warn").show();
+				$("input[type=button]").addClass("warnborder");
+				$(".box .warn p").html("请登入");
+			}
+
+		}, 6000)
+
+		$("#deviceNo,#username,#password").blur(function() {
+			if($(this).val().trim()) {
+				$(this).removeClass("warnborder")
+			}
+		})
+
+		function startReplenish() {
+			deviceNo = $("#deviceNo").val().trim();
+			host = $("#host").val().trim();
+			if(deviceNo == '' || host == '') {
+				$(".box .warn").show();
+				$("#deviceNo,#host").addClass("warnborder");
+				$(".box .warn p").html("设备号或服务器地址不能为空");
+				return;
+			} else {
+				localStorage.setItem("deviceNo", deviceNo);
+				localStorage.setItem("host", host);
+				window.location.href = "../index.html";
+			}
+		}
+	</script>
+
+</html>
