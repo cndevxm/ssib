@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title>首页</title>
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<link href="css/mui.min.css" rel="stylesheet" />
+		<link rel="stylesheet" type="text/css" href="css/icons-extra.css" />
+		<link rel="stylesheet" type="text/css" href="css/index.css" />
+		<style type="text/css">
+			.mui-content>.mui-table-view:first-child {
+				margin-top: -1px;
+			}
+			
+			#pullrefresh {
+				overflow-x: hidden;
+			}
+			#segmentedControl{
+				background-color: rgba(255,255,255,0);
+			}
+			#segmentedControl .mui-control-item {
+				color: #F8F8F8;
+			}
+		</style>
+	</head>
+
+	<body>
+		<!--下拉刷新容器-->
+		<div id="pullrefresh" class="mui-content mui-scroll-wrapper">
+			<div class="mui-scroll">
+
+				<!--数据列表-->
+				<div class="mui-content">
+					<div class="total">
+						<div class="top">
+							<div style="padding: 10px 10px;">
+								<div id="segmentedControl" class="mui-segmented-control mui-segmented-control-inverted mui-segmented-control-primary">
+									<a class="mui-control-item mui-active">
+										当日收益
+									</a>
+									<a class="mui-control-item">
+										当月收益
+									</a>
+									<a class="mui-control-item">
+										当年收益
+									</a>
+								</div>
+							</div>
+							<!--<div class="mui-row">
+								<div class="mui-col-sm-4 mui-col-xs-4">
+									<li class="mui-table-view-cell active">
+										当日收益
+									</li>
+								</div>
+								<div class="mui-col-sm-4 mui-col-xs-4">
+									<li class="mui-table-view-cell">
+										当月收益
+									</li>
+								</div>
+								<div class="mui-col-sm-4 mui-col-xs-4">
+									<li class="mui-table-view-cell">
+										当年收益
+									</li>
+								</div>
+							</div>-->
+						</div>
+						<div class="num">
+							<p class="amount">0.00</p>
+							<p>总销售额（元）</p>
+						</div>
+						<div class="mui-bottom">
+							<div class="mui-row">
+								<div class="mui-col-sm-6 mui-col-xs-6">
+									<li class="">
+										<p class="wechartPercent">0.0%</p>
+										<span>微信支付</span>
+										<span class="wechart">0.00</span>
+									</li>
+								</div>
+								<div class="mui-col-sm-6 mui-col-xs-6">
+									<li class="">
+										<p class="alipayPercent">0.0%</p>
+										<span>支付宝支付</span>
+										<span class="alipay">0.00</span>
+									</li>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="rowBox">
+						<div class="mui-row row1">
+							<br />
+							<label><span class="mui-icon-extra mui-icon-extra-classroom bgc1 "></span><b>您的售货机</b></label>
+							<label class="mui-pull-right primary"><i class="deviceNum">0</i></label>
+							<div class="progress"><span class="mui-btn-primary " style="width: 0%;"></span></div>
+						</div>
+						<div class="mui-row row2">
+							<br />
+							<label><span class="mui-icon mui-icon-checkmarkempty"></span>在线</label>
+							<label class="mui-pull-right success"><i class="onlineNum">0</i></label>
+							<div class="progress "><span class="mui-btn-success" style="width: 0%;"></span></div>
+						</div>
+
+						<div class="mui-row row3">
+							<br />
+							<label><span class="mui-icon-extra mui-icon-extra-notice"></span>缺货</label>
+							<label class="mui-pull-right warning"><i class="stockoutNum">0</i></label>
+							<div class="progress "><span class="mui-btn-warning" style="width: 0%;"></span></div>
+						</div>
+						<div class="mui-row row4">
+							<br />
+							<label><span class="mui-icon mui-icon-closeempty"></span>故障</label>
+							<label class="mui-pull-right danger"><i class="faultNum">0</i></label>
+							<div class="progress "><span class="mui-btn-danger" style="width: 0%;"></span></div>
+						</div>
+						<div class="mui-row row5">
+							<br />
+							<label><span class="mui-icon mui-icon-info "></span>离线</label>
+							<label class="mui-pull-right royal"><i class="offlineNum">0</i></label>
+							<div class="progress "><span class=" mui-btn-royal" style="width: 0%;"></span></div>
+						</div>
+					</div>
+
+					<!-- 为 ECharts 准备一个具备大小（宽高）的 DOM -->
+					<div id="main" style="margin: 2px auto 50px;width: 96%;min-height: 320px ;height:auto;"></div>
+
+				</div>
+			</div>
+		</div>
+
+		<script src="js/mui.js"></script>
+		<script src="js/jquery-3.2.1.min.js" type="text/javascript" charset="utf-8"></script>
+		<script src="js/echarts.min.js" type="text/javascript" charset="utf-8"></script>
+		<script src="js/util.js"></script>
+
+		<script type="text/javascript">
+			//			(function() {
+			mui.plusReady(function() {
+
+				plus.screen.lockOrientation("portrait-primary");
+				//关闭等待框
+				plus.nativeUI.closeWaiting();
+				//显示当前页面
+				mui.currentWebview.show();
+				//					判断是否登陆
+				if(localStorage.getItem("token")) {
+					mui.toast('登陆成功', {
+						duration: 'long',
+						type: 'div'
+					})
+				} else {
+					mui.openWindow({
+						url: 'login.html',
+						show: {
+							autoShow: false
+						}
+					});
+				}
+
+				mui.init({
+					swipeBack: true, //启用右滑关闭功能
+					pullRefresh: {
+						container: '#pullrefresh',
+						down: {
+							style: 'circle',
+							callback: pulldownRefresh
+						},
+						up: {
+							auto: true,
+							contentrefresh: '正在加载...',
+							callback: pullupRefresh
+						}
+					}
+				});
+				var deviceMsg;
+				//			上拉加载
+				function pullupRefresh() {
+					setTimeout(function() {
+						getDate();
+						getEarnings(dayTime, endTime);
+						getDeviceMsg();
+					}, 1500);
+				}
+
+				//			  下拉刷新
+
+				function pulldownRefresh() {
+					setTimeout(function() {
+						getDate();
+						getEarnings(dayTime, endTime);
+						getDeviceMsg();
+						mui('#pullrefresh').pullRefresh().endPulldownToRefresh();
+						jQuery('.active').removeClass("active");
+						jQuery('.mui-row div:first-child .mui-table-view-cell').addClass("active");
+						mui.toast("刷新成功。。。");
+					}, 1500);
+				}
+				//			初始化页面
+				//			获取时间
+				var endTime, dayTime, weekTime, monthTime, yearTime;
+
+				function getDate() {
+					var myDate = new Date(); //获取系统当前时间
+					var year = myDate.getFullYear(); //获取完整的年份(4位,1970-????)
+					var month = myDate.getMonth(); //获取当前月份(0-11,0代表1月)
+					var day = myDate.getDate(); //获取当前日(1-31)
+					var hours = myDate.getHours(); //获取当前小时数(0-23)
+					var minutes = myDate.getMinutes(); //获取当前分钟数(0-59)
+					var seconds = myDate.getSeconds(); //获取当前秒数(0-59)
+					endTime = year + (month < 9 ? ("0" + (month + 1)) : ("" + (month + 1))) + (day < 10 ? "0" + day : "" + day) + (hours < 10 ? "0" + hours : "" + hours) + (minutes < 10 ? "0" + minutes : "" + minutes) + (seconds < 10 ? "0" + seconds : "" + seconds);
+					dayTime = year + (month < 9 ? ("0" + (month + 1)) : ("" + (month + 1))) + (day < 10 ? "0" + day : "" + day) + "000000";
+					monthTime = year + (month < 9 ? ("0" + (month + 1)) : ("" + (month + 1))) + "01000000";
+					yearTime = year + "0101000000";
+
+				}
+				//请求收益信息
+				function getEarnings(begin, end) {
+					mui.ajax(url + "/api/app/statistics/order?token=" + localStorage.getItem("token"), {
+						data: {
+							beginTime: begin,
+							endTime: end
+
+						},
+						dataType: 'json', //服务器返回json格式数据
+						type: 'post', //HTTP请求类型
+						timeout: 10000, //超时时间设置为10秒；
+						headers: {
+							'Content-Type': 'application/json'
+						},
+						success: function(data) {
+							//服务器返回响应，根据响应结果，分析是否登录成功；
+							console.log(JSON.stringify(data));
+
+							if(data.success == true) {
+								var amount = wechartPercent = wechart = alipay = alipayPercent = 0;
+								if(data.object.length < 1) {
+									mui.toast('暂无收益', {
+										duration: 'long',
+										type: 'div'
+									})
+								
+								} else {
+										if(data.object[0].wechat_sale_amount){
+											wechart = data.object[0].wechat_sale_amount;
+										}else{
+											wechart = 0;
+										}
+										if(data.object[0].alipay_sale_amount){
+											alipay = data.object[0].alipay_sale_amount;
+										}else{
+											alipay = 0;
+										}
+								}
+								amount = wechart + alipay;
+								amount = amount.toFixed(2);
+								if(wechart == 0) {
+									wechartPercent = "0.00%";
+								} else {
+									wechartPercent = (wechart / amount * 100).toFixed(2) + "%";
+								}
+								if(alipay == 0) {
+									alipayPercent = "0.00%";
+								} else {
+									alipayPercent = (alipay / amount * 100).toFixed(2) + "%";
+								}
+
+								var num = 0
+								var timer = setInterval(function() {
+									num = Number((num + 33.33).toFixed(2));
+									if(num > amount) {
+										clearInterval(timer);
+										jQuery(".wechartPercent").html(wechartPercent);
+										jQuery(".alipayPercent").html(alipayPercent);
+									}
+									earningsAnimate("amount", num, amount);
+									earningsAnimate("wechart", num, wechart);
+									earningsAnimate("alipay", num, alipay);
+
+									function earningsAnimate(classNames, num, Dnum) {
+										if(Dnum - num <= 3.33) {
+											jQuery("." + classNames).html(Dnum);
+										} else {
+											jQuery("." + classNames).html(num);
+										}
+									}
+								}, 50)
+							} else if(data.error == "ERROR_INVALID_TOKEN") {
+								plus.nativeUI.toast('登录信息已过期，请重新登录');
+								mui.openWindow({
+									url: 'login.html',
+									show: {
+										autoShow: true
+									}
+								});
+							} else {
+								alert(data.msg)
+							}
+						},
+						error: function(xhr, type, errorThrown) {
+							//异常处理；
+							console.log(type);
+						}
+					});
+				}
+
+				//				请求设备信息
+				function getDeviceMsg() {
+					var onlineNum = offlineNum = stockoutNum = faultNum = 0;
+					mui.ajax(url + "/api/app/device/no-list?token=" + localStorage.getItem("token"), {
+						data: {},
+						dataType: 'json', //服务器返回json格式数据
+						type: 'post', //HTTP请求类型
+						timeout: 10000, //超时时间设置为10秒；
+						headers: {
+							'Content-Type': 'application/json'
+						},
+						success: function(data) {
+							//服务器返回响应，根据响应结果，分析是否登录成功；
+							console.log(JSON.stringify(data));
+							if(data.success == true) {
+								deviceMsg = data.object;
+								var deviceNum = data.object.length;
+								var deviceData = [];
+								deviceData[0] = {};
+								deviceData[0].value = "1";
+								deviceData[0].text = "弹簧柜";
+								deviceData[0].children = [];
+								deviceData[1] = {};
+								deviceData[1].value = "2";
+								deviceData[1].text = "RFID柜";
+								deviceData[1].children = [];
+								deviceData[2] = {};
+								deviceData[2].value = "3";
+								deviceData[2].text = "重力柜";
+								deviceData[2].children = [];
+								for(var i = 0; i < deviceNum; i++) {
+									if(data.object[i].type == 1) {
+										deviceData[0].children.push({
+											value: data.object[i].number,
+											text: data.object[i].number
+										});
+									} else if(data.object[i].type == 2) {
+										deviceData[1].children.push({
+											value: data.object[i].number,
+											text: data.object[i].number
+										});
+									} else if(data.object[i].type == 3) {
+										deviceData[2].children.push({
+											value: data.object[i].number,
+											text: data.object[i].number
+										});
+									}
+									if(data.object[i].is_online == 0) {
+										onlineNum++;
+									} else if(data.object[i].is_online == 1) {
+										offlineNum++;
+									}
+
+									if(data.object[i].total > 0) {
+										stockoutNum++;
+									}
+									if(data.object[i].state != 0) {
+										faultNum++;
+									}
+								}
+								console.log(JSON.stringify(deviceData));
+								localStorage.setItem("deviceData", JSON.stringify(deviceData))
+
+								var num = 0;
+								var timer = setInterval(function() {
+									num = num + 1;
+									if(num > deviceNum) {
+										clearInterval(timer);
+										//				echart
+										// 基于准备好的dom，初始化echarts实例
+										var myChart = echarts.init(document.getElementById('main'));
+
+										// 指定图表的配置项和数据
+
+										var option = {
+											tooltip: {
+												trigger: 'item',
+												formatter: "{a} <br/>{b}: {c} ({d}%)"
+											},
+											legend: {
+												orient: 'horizontal',
+												x: 'center',
+												top: 20,
+												data: ['在线', '离线', '缺货', '故障']
+											},
+											series: [{
+												name: '设备统计',
+												type: 'pie',
+												radius: ['30%', '40%'],
+												label: {
+													normal: {
+														formatter: '{a|{a}}{abg|}\n{hr|}\n  {b|{b}：}{c}  {per|{d}%}  ',
+														backgroundColor: '#eee',
+														borderColor: '#aaa',
+														borderWidth: 1,
+														borderRadius: 2,
+														rich: {
+															a: {
+																color: '#999',
+																lineHeight: 14,
+																align: 'center'
+															},
+															hr: {
+																borderColor: '#aaa',
+																width: '100%',
+																borderWidth: 0.5,
+																height: 0
+															},
+															b: {
+																fontSize: 10,
+																lineHeight: 11
+															},
+															per: {
+																color: '#eee',
+																backgroundColor: '#334455',
+																padding: [2, 3],
+																borderRadius: 2
+															}
+														}
+													}
+												},
+												data: [{
+														value: onlineNum,
+														name: '在线'
+													},
+													{
+														value: offlineNum,
+														name: '离线'
+													},
+													{
+														value: stockoutNum,
+														name: '缺货'
+													},
+													{
+														value: faultNum,
+														name: '故障'
+													}
+												]
+											}]
+										};
+										// 使用刚指定的配置项和数据显示图表
+										myChart.setOption(option);
+										//							自适应
+										window.onresize = myChart.resize;
+										window.onresize = function() {
+											myChart.resize();
+										}
+									}
+									deviceAnimate("deviceNum", num, deviceNum, deviceNum);
+									deviceAnimate("onlineNum", num, onlineNum, deviceNum);
+									deviceAnimate("offlineNum", num, offlineNum, deviceNum);
+									deviceAnimate("stockoutNum", num, stockoutNum, deviceNum);
+									deviceAnimate("faultNum", num, faultNum, deviceNum);
+
+								}, 50);
+
+								function deviceAnimate(classNames, num, Dnum, deviceNum) {
+									if(Dnum - num <= 3) {
+										jQuery("." + classNames).html(Dnum);
+										jQuery("." + classNames).parent("label").siblings("div").find("span").css("width", Dnum / deviceNum * 100 + "%");
+									} else {
+										jQuery("." + classNames).html(num);
+										jQuery("." + classNames).parent("label").siblings("div").find("span").css("width", num / deviceNum * 100 + "%");
+									}
+								}
+
+							} else if(data.error == "ERROR_INVALID_TOKEN") {
+								plus.nativeUI.toast('登录信息已过期，请重新登录');
+								mui.openWindow({
+									url: 'login.html',
+									show: {
+										autoShow: true
+									}
+								});
+							} else {
+								alert(data.msg);
+								return;
+							}
+						},
+						error: function(xhr, type, errorThrown) {
+							//异常处理；
+							console.log(type);
+						}
+					});
+				}
+
+				//				收益切换
+				mui('#segmentedControl').on('tap', '.mui-control-item', function(event) {
+					jQuery(this).addClass("active");
+					jQuery(this).parent("div").siblings("div").find("li").removeClass("active");
+					var index = jQuery(this).index();
+					console.log(index);
+					switch(index) {
+						case 0:
+							getDate();
+							getEarnings(dayTime, endTime);
+							break;
+						case 1:
+							getDate();
+							getEarnings(monthTime, endTime);
+							break;
+						case 2:
+							getDate();
+							getEarnings(yearTime, endTime);
+							break;
+						default:
+							alert("网络问题，请重试")
+							break;
+					}
+				});
+
+				//				设备状态详情
+				for(var i = 1; i <= jQuery('.rowBox .mui-row').length; i++) {
+					(function(i) {
+						mui('body').on('tap', '.row' + i, function() {
+							console.log(i)
+							mui.openWindow({
+								url: 'html/pages/view' + i + '.html',
+								id: '',
+								show: {
+									aniShow: 'pop-in'
+								},
+								waiting: {
+									autoShow: false
+								},
+								extras: {
+									data: deviceMsg
+								}
+							});
+						})
+					})(i);
+				}
+			});
+
+			//			})();
+		</script>
+		<script type="text/javascript">
+			mui.plusReady(function() {
+				console.log("ready");
+				//				getEarnings1();
+
+				function getEarnings1() {
+					mui.ajax(url + "/api/app/user/info?token=" + localStorage.getItem("token"), {
+						data: {
+
+						},
+						dataType: 'json', //服务器返回json格式数据
+						type: 'post', //HTTP请求类型
+						timeout: 10000, //超时时间设置为10秒；
+						headers: {
+							'Content-Type': 'application/json'
+						},
+						success: function(data) {
+							//服务器返回响应，根据响应结果，分析是否登录成功；
+							console.log(JSON.stringify(data));
+						},
+						error: function(xhr, type, errorThrown) {
+							//异常处理；
+							console.log(type);
+						}
+					});
+				}
+
+				// 创建子webview窗口 并初始化
+				var aniShow = {};
+				util.initSubpage(aniShow);
+
+				var nview = plus.nativeObj.View.getViewById('tabBar'),
+					activePage = plus.webview.currentWebview(),
+					targetPage,
+					subpages = util.options.subpages,
+					pageW = window.innerWidth,
+					currIndex = 0;
+
+				/**
+				 * 根据判断view控件点击位置判断切换的tab
+				 */
+				nview.addEventListener('click', function(e) {
+					var clientX = e.clientX;
+					if(clientX > 0 && clientX <= parseInt(pageW * 0.25)) {
+						currIndex = 0;
+					} else if(clientX > parseInt(pageW * 0.25) && clientX <= parseInt(pageW * 0.45)) {
+						currIndex = 1;
+					} else if(clientX > parseInt(pageW * 0.45) && clientX <= parseInt(pageW * 0.8)) {
+						currIndex = 2;
+					} else {
+						currIndex = 3;
+					}
+					console.log(currIndex);
+					// 匹配对应tab窗口	
+					if(currIndex > 0) {
+						targetPage = plus.webview.getWebviewById(subpages[currIndex - 1]);
+					} else {
+						targetPage = plus.webview.currentWebview();
+					}
+
+					if(targetPage == activePage) {
+						return;
+					}
+					if(currIndex !== 3) {
+						//底部选项卡切换
+						util.toggleNview(currIndex);
+						// 子页面切换
+						util.changeSubpage(targetPage, activePage, aniShow);
+						//更新当前活跃的页面
+						activePage = targetPage;
+					} else {
+						//第四个tab 打开新窗口
+						plus.webview.open('html/my.html', 'new', {}, 'slide-in-right', 200);
+					}
+
+				});
+
+			})
+		</script>
+
+	</body>
+
+</html>

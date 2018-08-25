@@ -1,0 +1,362 @@
+<!doctype html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title>销量统计</title>
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<link href="../../css/mui.min.css" rel="stylesheet" />
+		<link rel="stylesheet" type="text/css" href="../../css/mui.picker.min.css" />
+		<style type="text/css">
+			.timebox {
+				/*width: 30%;
+				float: left;
+				background-color: red;*/
+			}
+			
+			.timebox button {
+				float: left;
+			}
+		</style>
+	</head>
+
+	<body>
+
+		<header class="mui-bar mui-bar-nav">
+			<a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
+			<h1 class="mui-title">销量统计</h1>
+		</header>
+		<div style="margin-top: 50px; padding: 10px 10px;">
+			<div id="segmentedControl" class="mui-segmented-control">
+				<a class="mui-control-item mui-active" href="#item1">
+					日
+				</a>
+				<a class="mui-control-item" href="#item2">
+					月
+				</a>
+				<a class="mui-control-item" href="#item3">
+					年
+				</a>
+			</div>
+		</div>
+		<div>
+			<div id="item1" class="mui-control-content mui-active">
+				<ul class="mui-table-view">
+					<li class="mui-table-view-cell beginTime">开始日期 <span class="mui-badge mui-badge-primary"></span></li>
+					<li class="mui-table-view-cell endTime">结束日期 <span class="mui-badge mui-badge-primary"></span></li>
+					<div class="mui-input-row mui-table-view-divider">
+						<label>设备号：</label>
+						<input type="text" class="mui-input-clear deviceNo" placeholder="请输入设备号">
+					</div>
+
+				</ul>
+				<button type="button" class="mui-btn mui-btn-primary mui-btn-block dataBtn">确定</button>
+			</div>
+			<div id="item2" class="mui-control-content">
+				<ul class="mui-table-view">
+					<li class="mui-table-view-cell beginTime">开始月份 <span class="mui-badge mui-badge-primary"></span></li>
+					<li class="mui-table-view-cell endTime">结束月份 <span class="mui-badge mui-badge-primary"></span></li>
+					<div class="mui-input-row mui-table-view-divider">
+						<label>设备号：</label>
+						<input type="text" class="mui-input-clear deviceNo" placeholder="请输入设备号">
+					</div>
+
+				</ul>
+				<button type="button" class="mui-btn mui-btn-primary mui-btn-block dataBtn">确定</button>
+			</div>
+			<div id="item3" class="mui-control-content">
+				<ul class="mui-table-view">
+					<li class="mui-table-view-cell beginTime">开始年份 <span class="mui-badge mui-badge-primary"></span></li>
+					<li class="mui-table-view-cell endTime">结束年份 <span class="mui-badge mui-badge-primary"></span></li>
+					<div class="mui-input-row mui-table-view-divider">
+						<label>设备号：</label>
+						<input type="text" class="mui-input-clear deviceNo" placeholder="请输入设备号">
+					</div>
+
+				</ul>
+				<button type="button" class="mui-btn mui-btn-primary mui-btn-block dataBtn">确定</button>
+			</div>
+		</div>
+
+		<!-- 为 ECharts 准备一个具备大小（宽高）的 DOM -->
+		<div id="main" style="margin: 60px auto 50px;width:100%;min-height: 300px ;height:auto;"></div>
+
+		<script src="../../js/mui.min.js"></script>
+		<script src="../../js/jquery-3.2.1.min.js" type="text/javascript" charset="utf-8"></script>
+		<script src="../../js/mui.picker.min.js" type="text/javascript" charset="utf-8"></script>
+		<script src="../../js/echarts.min.js" type="text/javascript" charset="utf-8"></script>
+		<script>
+		</script>
+
+		<script type="text/javascript">
+			mui.init();　
+			mui.plusReady(function() {; //7天前日期			
+				getMsg(getDay(-6) + "000000", getDay(0) + "235959", "3");
+				//关闭等待框
+				plus.nativeUI.closeWaiting();
+				//显示当前页面
+				mui.currentWebview.show();
+
+				function getDay(day) {
+					var today = new Date();
+					var targetday_milliseconds = today.getTime() + 1000 * 60 * 60 * 24 * day;
+
+					today.setTime(targetday_milliseconds); //注意，这行是关键代码
+
+					var tYear = today.getFullYear();
+					var tMonth = today.getMonth();
+					var tDate = today.getDate();
+					tMonth = doHandleMonth(tMonth + 1);
+					tDate = doHandleMonth(tDate);
+					console.log(tYear + "-" + tMonth + "-" + tDate)
+					return tYear + "" + tMonth + "" + tDate;
+				}
+
+				function doHandleMonth(month) {
+					var m = month;
+					if(month.toString().length == 1) {
+						m = "0" + month;
+					}
+					console.log(m)
+					return m;
+				}
+				var index = 0;
+				var showType = "3";
+				var year, month, day, beginYear, beginMonth, beginDay, endYear, endMonth, endDay, beginTime, endTime;
+
+				function getData() {
+					var myDate = new Date();
+					year = myDate.getFullYear();
+					month = myDate.getMonth() + 1;
+					month < 10 ? month = "0" + month : month = month;
+					day = myDate.getDate();
+					day < 10 ? day = "0" + day : day = day;
+				}
+				getData();
+				jQuery('.beginTime span,.endTime span').html(year + "-" + month + "-" + day);
+				mui('#segmentedControl').on('tap', '.mui-control-item', function(event) {
+					getData();
+					index = jQuery(this).index();
+					console.log(year + "-" + month + "-" + day)
+					console.log(index)
+					switch(index) {
+						case 0:
+							showType = 3;
+							jQuery('.beginTime span,.endTime span').html(year + "-" + month + "-" + day);
+							break;
+						case 1:
+							showType = 2;
+							jQuery('.beginTime span,.endTime span').html(year + "-" + month);
+							break;
+						case 2:
+							showType = 1;
+							jQuery('.beginTime span,.endTime span').html(year);
+							break;
+						default:
+							alert("出现故障，请联系客服");
+							break;
+					}
+				})
+
+				jQuery('.beginTime,.endTime').click(function() {
+					if(jQuery(this).hasClass("beginTime")) {
+						var thisDom = jQuery(".beginTime").find("span");
+					} else if(jQuery(this).hasClass("endTime")) {
+						var thisDom = jQuery(".endTime").find("span");
+					}
+					var myDate = new Date();
+					switch(index) {
+						case 0:
+							showType = 3;
+							myDate.setFullYear(year, month, day);
+							var dtpicker = new mui.DtPicker({
+								type: "date", //设置日历初始视图模式 
+								beginDate: new Date(2018, 07, 01), //设置开始日期 
+								endDate: myDate, //设置结束日期 
+								labels: ['Year', 'Mon', 'Day'], //设置默认标签区域提示语 				
+							})
+							dtpicker.show(function(e) {
+								console.log(JSON.stringify(e));
+								dataYear = e.y.value;
+								dataMonth = e.m.value;
+								dataDay = e.d.value;
+								console.log(dataYear + dataMonth + dataDay);
+								thisDom.html(dataYear + "-" + dataMonth + "-" + dataDay)
+							})
+							break;
+						case 1:
+							showType = 2;
+							myDate.setFullYear(year, month);
+							var dtpicker = new mui.DtPicker({
+								type: "month", //设置日历初始视图模式 
+								beginDate: new Date(2018, 07), //设置开始日期 
+								endDate: myDate, //设置结束日期 
+								labels: ['Year', 'Mon'], //设置默认标签区域提示语 				
+							})
+							dtpicker.show(function(e) {
+								console.log(JSON.stringify(e));
+								dataYear = e.y.value;
+								dataMonth = e.m.value;
+								thisDom.html(dataYear + "-" + dataMonth)
+							})
+							break;
+						case 2:
+							showType = 1;
+							myDate.setFullYear(year);
+							var dtpicker = new mui.DtPicker({
+								type: "year", //设置日历初始视图模式 
+								beginDate: new Date(2017), //设置开始日期 
+								endDate: myDate, //设置结束日期 
+								labels: ['Year'], //设置默认标签区域提示语 				
+							})
+							dtpicker.show(function(e) {
+								console.log(JSON.stringify(e));
+								dataYear = e.y.value;
+								thisDom.html(dataYear)
+							})
+							break;
+						default:
+							alert("网络异常")
+							break;
+					}
+
+				})
+				jQuery(".dataBtn").click(function() {
+
+					switch(showType) {
+						case 1:
+							beginTime = jQuery('.beginTime span').html().replace(/-/g, "") + "0101000000";
+							endTime = jQuery('.endTime span').html().replace(/-/g, "") + "1231235959";
+
+							break;
+						case 2:
+							beginTime = jQuery('.beginTime span').html().replace(/-/g, "") + "01000000";
+							endTime = jQuery('.endTime span').html().replace(/-/g, "") + "31235959";
+
+							break;
+						case 3:
+							beginTime = jQuery('.beginTime span').html().replace(/-/g, "") + "000000";
+							endTime = jQuery('.endTime span').html().replace(/-/g, "") + "235959";
+
+							break;
+						default:
+							break;
+					}
+					getMsg(beginTime, endTime, showType);
+				})
+
+				function getMsg(beginTime, endTime, showType) {
+					console.log(beginTime)
+					console.log(endTime)
+					console.log(showType)
+					mui.ajax(url + "/api/app/statistics/order?token=" + localStorage.getItem("token"), {
+						data: {
+							beginTime: beginTime,
+							endTime: endTime,
+							showType: showType,
+							deviceNo: jQuery('.deviceNo').val()
+						},
+						dataType: 'json', //服务器返回json格式数据
+						type: 'post', //HTTP请求类型
+						timeout: 10000, //超时时间设置为10秒；
+						headers: {
+							'Content-Type': 'application/json'
+						},
+						success: function(data) {
+							//服务器返回响应，根据响应结果，分析是否登录成功；
+							console.log(JSON.stringify(data));
+
+							if(data.success == true) {
+								var xAxis = [];
+								var series1 = [];
+								var series2 = [];
+								data.object.forEach(function(val, i) {
+									if(i % 2 == 0) {
+										if(val.pay_time.length > 7) {
+											xAxis.push(val.pay_time.slice(5));
+										} else {
+											xAxis.push(val.pay_time);
+										}
+
+										series1.push(val.sale_amount);
+									} else {
+										series2.push(val.sale_amount);
+									}
+
+								})
+								console.log(xAxis)
+								console.log(series1)
+								console.log(series2)
+								//				echart
+								// 基于准备好的dom，初始化echarts实例
+								var myChart = echarts.init(document.getElementById('main'));
+
+								// 指定图表的配置项和数据
+
+								var option = {
+									title: {
+										text: ' '
+									},
+									tooltip: {
+										trigger: 'axis'
+									},
+									legend: {
+										data: ['微信', '支付宝']
+									},
+									grid: {
+										left: '3%',
+										right: '4%',
+										bottom: '3%',
+										containLabel: true
+									},
+									xAxis: {
+										type: 'category',
+										boundaryGap: false,
+										data: xAxis
+									},
+									yAxis: {
+										type: 'value'
+									},
+									series: [{
+											name: '微信',
+											type: 'line',
+											stack: '总量',
+											data: series1
+										},
+										{
+											name: '支付宝',
+											type: 'line',
+											stack: '总量',
+											data: series2
+										}
+									]
+								};
+								// 使用刚指定的配置项和数据显示图表
+								myChart.setOption(option);
+								//							自适应
+								window.onresize = myChart.resize;
+							} else if(data.error == "ERROR_INVALID_TOKEN") {
+								plus.nativeUI.toast('登录信息已过期，请重新登录');
+								mui.openWindow({
+									url: '../../login.html',
+									show: {
+										autoShow: true
+									}
+								});
+							} else {
+								alert(data.msg)
+							}
+						},
+						error: function(xhr, type, errorThrown) {
+							//异常处理；
+							console.log(type);
+							console.log(JSON.stringify(errorThrown))
+						}
+					});
+				}
+
+			})
+		</script>
+	</body>
+
+</html>

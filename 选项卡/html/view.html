@@ -1,0 +1,233 @@
+<!doctype html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<link href="../css/mui.min.css" rel="stylesheet" />
+		<style type="text/css">
+			.mui-media span {
+				margin-right: 2vw;
+			}
+			
+			.mui-badge {
+				margin-right: 5%;
+			}
+			
+			.mui-table-view {
+				margin-top: 60px;
+			}
+			
+			li {
+				width: 40%;
+				margin: 2px 5%;
+				float: left;
+				border: 1px solid #d5d5d9;
+			}
+			
+			li span {
+				display: block;
+			}
+			
+			.mui-btn-block {
+				margin-top: 60px;
+				position: fixed;
+				bottom: 10px;
+				left: 0;
+				display: none;
+			}
+			
+			.aaa {
+				display: none;
+			}
+		</style>
+	</head>
+
+	<body>
+		<header class="mui-bar mui-bar-nav">
+			<a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
+			<h1 class="mui-title">补货</h1>
+		</header>
+		<ul class="mui-table-view mui-table-view-chevron"></ul>
+		<p></p>
+		<div class="mui-card-box"></div>
+		<button type="button" class="mui-btn mui-btn-primary aaa">关闭ws</button>
+		<button type="button" class="mui-btn mui-btn-primary mui-btn-block">开门补货</button>
+		<script src="../js/mui.min.js"></script>
+		<script src="../js/jquery-3.2.1.min.js" type="text/javascript" charset="utf-8"></script>
+		<script src="../js/reconnecting-websocket.js" type="text/javascript" charset="utf-8"></script>
+		<script type="text/javascript">
+			mui.init()
+			mui.plusReady(function() {
+				window.addEventListener('refresh', function(e) { //执行刷新
+					location.reload();
+				});
+				//关闭等待框
+				plus.nativeUI.closeWaiting();
+				//显示当前页面
+				mui.currentWebview.show();
+				var number = plus.webview.currentWebview().data;
+				var type = plus.webview.currentWebview().type;
+				console.log(number)
+				console.log(type)
+				if(type == "弹簧柜") {
+					jQuery('.mui-btn-block,.aaa').css("display", "none")
+					var arr = [];
+					mui.ajax(url + "/api/app/aisle/aisleManage?token=" + localStorage.getItem("token"), {
+						data: {
+							number: number
+						},
+						dataType: 'json', //服务器返回json格式数据
+						type: 'post', //HTTP请求类型
+						timeout: 10000, //超时时间设置为10秒；
+						headers: {
+							'Content-Type': 'application/json'
+						},
+						success: function(data) {
+							//服务器返回响应，根据响应结果，分析是否登录成功；
+							console.log("---" + JSON.stringify(data));
+
+							if(data.success == true) {
+								data.object.aisles.forEach(function(val, index) {
+									arr.push(val);
+									var state;
+									val.state == 0 ? state = "正常" : state = "关闭";
+									var html = '<li class="mui-table-view-cell"><div class="mui-table-cell"><img style="display:none" class="mui-media-object mui-pull-left" src="' + imgUrl + val.goodsPicture + '"><div class="mui-media-body">货道号:' + val.number + '<p class="mui-ellipsis"><span>商品:' + val.goodsName + '</span><span>货道容量:' + val.capacity + '</span><span>货道余量:' + val.storage + '</span><span>货道状态:' + state + '</span></p></div></li>'
+									//var html='<li class="mui-table-view-cell mui-transitioning mui-media mui-col-xs-6 mui-col-sm-6"><div class="mui-slider-right mui-disabled"><a class="mui-btn mui-btn-grey mui-icon mui-icon-person" style="transform: translate(0px, 0px);"></a><a class="mui-btn mui-btn-yellow mui-icon mui-icon-phone" style="transform: translate(-90px, 0px);"></a><a class="mui-btn mui-btn-red mui-icon mui-icon-email" style="transform: translate(-180px, 0px);"></a></div><div class="mui-slider-handle" style="transform: translate(0px, 0px);"><div class="mui-table-cell"><img class="mui-media-object mui-pull-left" src="' + imgUrl + val.goodsPicture + '"><div class="mui-media-body">货道号:' + val.number + '<p class="mui-ellipsis"><span>商品:' + val.goodsName + '</span><span>货道容量:' + val.capacity + '</span><span>货道余量:' + val.storage + '</span><span>货道状态:' + state + '</span>	</p></div></div></div></li>';
+									jQuery('.mui-table-view-chevron').append(html)
+								})
+							} else if(data.error == "ERROR_INVALID_TOKEN") {
+								plus.nativeUI.toast('登录信息已过期，请重新登录');
+								mui.openWindow({
+									url: '../login.html',
+									show: {
+										autoShow: true
+									}
+								});
+							} else {
+								alert(data.msg)
+							}
+						},
+						error: function(xhr, type, errorThrown) {
+							//异常处理；
+							console.log(type);
+							console.log(JSON.stringify(errorThrown))
+						}
+					});
+				} else {
+					jQuery('.mui-btn-block,.aaa').css("display", "block")
+					jQuery('.mui-btn-block').click(function() {
+						console.log("ws");
+						//服务器地址
+						var ws;
+						jQuery('.aaa').click(function() {
+							ws.close();
+						})
+
+						var target = wsHost + "/websocket/ssib/replenish?deviceNo=" + number;
+						console.log(target);
+						ws = new ReconnectingWebSocket(target);
+
+						//连接发生错误的回调方法 
+						ws.onerror = function(e) {
+							console.log(JSON.stringify(e))
+							jQuery('p').append(JSON.stringify(e))
+						};
+
+						//连接成功建立的回调方法
+						ws.onopen = function(e) {
+							jQuery('p').append(JSON.stringify(e))
+							console.log(JSON.stringify(e))
+							mui.ajax(url + '/api/app/replenish/door?deviceNo=' + number + "&token=" + localStorage.getItem("token"), {
+
+								dataType: 'json', //服务器返回json格式数据
+								type: 'get', //HTTP请求类型
+								timeout: 10000, //超时时间设置为10秒；
+								headers: {
+									'Content-Type': 'application/json'
+								},
+								success: function(data) {
+									//服务器返回响应，根据响应结果，分析是否登录成功；
+									console.log(JSON.stringify(data));
+									jQuery('p').html(JSON.stringify(data))
+								},
+								error: function(xhr, type, errorThrown) {
+									//异常处理；
+									console.log(type);
+									console.log(JSON.stringify(errorThrown))
+								}
+							});
+
+						};
+
+						//接收到消息的回调方法
+						ws.onmessage = function(event) {
+							jQuery('p').append(JSON.stringify(event))
+
+							var result = JSON.parse(event.data);
+							var type = result.type;
+							var list = data.list;
+							if(type === "door") {
+								var success = result.success;
+								var msg = result.msg;
+								if(success === true) {
+									alert("开门成功，请补货");
+								}   
+							} else if(type === "replenishGoods") {
+								if(list.length === 0) {
+									$("").html("未补货");
+									return;
+								}
+								var html = '';
+								for(var i = 0; i < list.length; i++) {
+									var goods = list[i];
+									html += '<div class="mui-card"><div class="mui-card-header">' + list[i].goodsName + '</div><div class="mui-card-content"><div class="mui-card-content-inner">';
+									html += '<div><span>货道ID:</span>' + list[i].id + '</div>';
+									html += '<div><span>商品ID:</span>' + list[i].goodId + '</div>';
+									html += '<div><span>货柜号:</span>' + list[i].cabinetNo + '</div>';
+									html += '<div><span>货道号:</span>' + list[i].sort + '</div>';
+									html += '<div><span>数量:</span>' + list[i].storage + '（g）</div>';
+									html += '</div></div><div class="mui-card-footer">页脚</div></div>';
+								}
+
+								$(".mui-card-box").html(html);
+
+							}
+						};
+
+						//连接关闭的回调方法
+						ws.onclose = function(e) {
+
+							jQuery('p').append(JSON.stringify(e))
+						};
+
+						//监听窗口关闭事件，当窗口关闭时，主动去关闭websocket连接，防止连接还没断开就关闭窗口，server端会抛异常。
+						window.onbeforeunload = function() {
+							ws.close();
+						}
+					})
+
+				}
+
+				jQuery('body').on('click', 'li', function(e) {
+					var index = jQuery(this).index();
+					console.log(JSON.stringify(arr[index]));
+
+					mui.openWindow({
+						url: 'replenishment.html',
+						show: {
+							autoShow: false
+						},
+						extras: {
+							data: arr[index],
+							deviceNo: number
+						}
+					});
+				})
+
+			})
+		</script>
+	</body>
+
+</html>

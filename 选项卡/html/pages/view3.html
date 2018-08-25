@@ -1,0 +1,240 @@
+<!doctype html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<link href="../../css/mui.min.css" rel="stylesheet" />
+		<style>
+			.mui-badge {
+				margin-right: 5%;
+			}
+		</style>
+	</head>
+
+	<body>
+		<header class="mui-bar mui-bar-nav">
+			<a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
+			<h1 class="mui-title">缺货设备</h1>
+		</header>
+		<div class="mui-content">
+
+			<ul class="mui-table-view mui-table-view-chevron">
+				<li class="mui-table-view-cell">总计：
+					<span class="mui-badge mui-badge-primary total">0</span>
+				</li>
+				<li class="mui-table-view-cell mui-collapse">
+					<span class="mui-badge  device1">0</span>
+					<a class="mui-navigate-right" href="#">弹簧柜</a>
+					<ul class="mui-table-view mui-table-view-chevron arr1"></ul>
+				</li>
+				<li class="mui-table-view-cell mui-collapse">
+					<span class="mui-badge  device2">0</span>
+					<a class="mui-navigate-right" href="#">RFID柜</a>
+					<ul class="mui-table-view mui-table-view-chevron arr2"></ul>
+				</li>
+				<li class="mui-table-view-cell mui-collapse">
+
+					<span class="mui-badge  device3">0</span>
+					<a class="mui-navigate-right" href="#">重力柜</a>
+					<ul class="mui-table-view mui-table-view-chevron arr3"></ul>
+				</li>
+			</ul>
+		</div>
+
+		<script src="../../js/mui.min.js"></script>
+		<script src="../../js/jquery-3.2.1.min.js" type="text/javascript" charset="utf-8"></script>
+		<script type="text/javascript">
+			mui.init()
+
+			mui.plusReady(function() {
+				//关闭等待框
+				plus.nativeUI.closeWaiting();
+				//显示当前页面
+				mui.currentWebview.show();
+				var deviceMsg = plus.webview.currentWebview().data;
+				console.log(JSON.stringify(deviceMsg));
+				var total = device1 = device2 = device3 = 0;
+				var arr1 = arr2 = arr3 = [];
+				deviceMsg.forEach(function(val, index) {
+					//					console.log(JSON.stringify(val), index, this);
+
+					var state, type, city = "";
+					if(val.state == 0) {
+						state = "在线";
+					} else {
+						state = "离线";
+					}
+					if(val.type == 1) {
+						type = "弹簧柜";
+					} else if(val.type == 2) {
+						type = "RFID柜";
+					} else if(val.type == 3) {
+						type = "重力柜";
+					}
+
+					if(val.province + val) {
+						city += val.province;
+					}
+					if(val.city) {
+						city += val.city;
+					}
+					if(val.disctinct) {
+						city += val.disctinct;
+					}
+
+					var html = '<li class="mui-table-view-cell mui-transitioning"><div class="mui-slider-right mui-disabled"><a class="mui-btn mui-btn-grey" style="transform: translate(0px, 0px);">补货</a><a class="mui-btn mui-btn-yellow" style="transform: translate(-90px, 0px);">全部补满</a><a class="mui-btn mui-btn-red" style="transform: translate(-180px, 0px);">全部清空</a></div><div class="mui-slider-handle" style="transform: translate(0px, 0px);"><div class="mui-table-cell">' + val.number + '</div></div></li>';
+					if(val.total > 0) {
+						total++;
+						if(val.type == 1) {
+							device1++;
+							arr1.push(val.number);
+							//jQuery('.arr1').append('<li class="mui-table-view-cell"><a class="mui-navigate-right" href="#">'+val.number+'</a></li>');
+							jQuery('.arr1').append(html);
+						} else if(val.type == 2) {
+							device2++;
+							arr2.push(val.number);
+							jQuery('.arr2').append(html);
+						} else if(val.type == 3) {
+							device3++;
+							arr3.push(val.number);
+							jQuery('.arr3').append(html);
+						}
+					}
+
+					jQuery('.total').html(total);
+					jQuery('.device1').html(device1);
+					jQuery('.device2').html(device2);
+					jQuery('.device3').html(device3);
+				})
+				jQuery('.mui-btn-grey').on('click', function(e) {
+					console.log(jQuery(this).parents("ul").siblings("a").html())
+					mui.openWindow({
+						url: '../view.html',
+						show: {
+							autoShow: false
+						},
+						extras: {
+							data: jQuery(this).parent("div").siblings(".mui-slider-handle").find("div").html(),
+							type: jQuery(this).parents("ul").siblings("a").html()
+						}
+					});
+				})
+				jQuery('.mui-btn-yellow').on('click', function(e) {
+					mask.show()
+
+					mui.ajax(url + "/api/app/aisle/fillGoods?token=" + localStorage.getItem("token"), {
+						data: {
+							deviceNo: jQuery(this).parent("div").siblings(".mui-slider-handle").find("div").html(),
+							number: [1]
+						},
+						dataType: 'json', //服务器返回json格式数据
+						type: 'post', //HTTP请求类型
+						timeout: 10000, //超时时间设置为10秒；
+						headers: {
+							'Content-Type': 'application/json'
+						},
+						success: function(data) {
+							//服务器返回响应，根据响应结果，分析是否登录成功；
+							console.log(JSON.stringify(data));
+
+							if(data.success == true) {
+								console.log(JSON.stringify(data));
+								mui.toast('补货成功', {
+									duration: 'long',
+									type: 'div'
+								});
+								mask.close()
+
+								//								mui.back();
+							} else if(data.error == "ERROR_INVALID_TOKEN") {
+								plus.nativeUI.toast('登录信息已过期，请重新登录');
+								mui.openWindow({
+									url: '../../login.html',
+									show: {
+										autoShow: true
+									}
+								});
+							} else {
+								alert(data.msg)
+							}
+						},
+						error: function(xhr, type, errorThrown) {
+							//异常处理；
+							console.log(type);
+							console.log(JSON.stringify(errorThrown))
+						}
+					})
+				})
+
+				jQuery('.mui-btn-red').on('click', function(e) {
+					mask.show()
+
+					mui.ajax(url + "/api/app/aisle/clearGoods?token=" + localStorage.getItem("token"), {
+						data: {
+							deviceNo: jQuery(this).parent("div").siblings(".mui-slider-handle").find("div").html(),
+							number: [1]
+						},
+						dataType: 'json', //服务器返回json格式数据
+						type: 'post', //HTTP请求类型
+						timeout: 10000, //超时时间设置为10秒；
+						headers: {
+							'Content-Type': 'application/json'
+						},
+						success: function(data) {
+							//服务器返回响应，根据响应结果，分析是否登录成功；
+							console.log(JSON.stringify(data));
+
+							if(data.success == true) {
+								console.log(JSON.stringify(data));
+								mui.toast('补货成功', {
+									duration: 'long',
+									type: 'div'
+								});
+								mask.close()
+
+								//								mui.back();
+							} else if(data.error == "ERROR_INVALID_TOKEN") {
+								plus.nativeUI.toast('登录信息已过期，请重新登录');
+								mui.openWindow({
+									url: '../../login.html',
+									show: {
+										autoShow: true
+									}
+								});
+							} else {
+								alert(data.msg)
+							}
+						},
+						error: function(xhr, type, errorThrown) {
+							//异常处理；
+							console.log(type);
+							console.log(JSON.stringify(errorThrown))
+						}
+					})
+				})
+
+				var mask = mui.createMask(); //遮罩层
+				jQuery('li ul li').on('click', function(e) {
+					if(jQuery(this).hasClass("mui-selected")) {
+						jQuery(this).removeClass("mui-selected");
+						jQuery(this).find("div").eq(0).removeClass("mui-selected");
+						jQuery(this).find("div").eq(0).find("a").eq(0).css("transform", "translate(0px, 0px)");
+						jQuery(this).find("div").eq(0).find("a").eq(1).css("transform", "translate(-90px, 0px)");
+						jQuery(this).find("div").eq(0).find("a").eq(2).css("transform", "translate(-180px, 0px)");
+						jQuery(this).find("div").eq(1).css("transform", "translate(0px, 0px)");
+					} else {
+						jQuery(this).addClass("mui-selected")
+						jQuery(this).find("div").eq(0).addClass("mui-selected");
+						jQuery(this).find("div").eq(0).children("a").css("transform", "translate(-310px, 0px)");
+						jQuery(this).find("div").eq(1).css("transform", "translate(-310px, 0px)");
+
+					}
+				})
+
+			});
+		</script>
+	</body>
+
+</html>

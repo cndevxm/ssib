@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<meta http-equiv="X-UA-Compatible" content="ie=edge" />
+		<title>Document</title>
+		<link rel="stylesheet" href="../css/mui.min.css" />
+		<link rel="stylesheet" type="text/css" href="../css/mui.picker.min.css" />
+		<link rel="stylesheet" type="text/css" href="../css/mui.poppicker.css" />
+	</head>
+
+	<body>
+		<div class="mui-input-row">
+			<label>设备号</label>
+			<div id="deviceNo">
+				
+			</div>
+		</div>
+		<ul class="mui-table-view">
+		           
+		            <li class="mui-table-view-divider">设备号：</li>
+		            <li class="mui-table-view-cell click">手动选取 <span class="mui-badge mui-badge-primary deviceNo">0</span></li>
+		            <li class="mui-table-view-cell code">扫码获取<span class="mui-badge mui-badge-success deviceNo">0</span></li>
+		            
+		        </ul>
+	</body>
+	<script src="../js/jquery-3.2.1.min.js" type="text/javascript" charset="utf-8"></script>
+	<script src="../js/mui.min.js" type="text/javascript" charset="utf-8"></script>
+	<script src="../js/mui.picker.min.js" type="text/javascript" charset="utf-8"></script>
+	<script src="../js/mui.poppicker.js" type="text/javascript" charset="utf-8"></script>
+	<script type="text/javascript">
+		var arr = [{
+			"value": "120000",
+			"text": "重力柜",
+			"children": [{
+				"value": "120101",
+				"text": "120101"
+			}, {
+				"value": "120102",
+				"text": "120102"
+			}, {
+				"value": "120104",
+				"text": "120104"
+			}]
+		}, {
+			"value": "120101",
+			"text": "120101"
+		}]
+		jQuery(".click").click(function() {
+			var picker = new mui.PopPicker({
+				layer: 2
+			});
+			picker.setData([{
+				value: '110000',
+				text: '弹簧柜',
+				children: [{
+					value: "110101",
+					text: "110101"
+				}]
+			}, {
+				value: '120000',
+				text: '重力柜',
+				children: [{
+					value: "120101",
+					text: "120101"
+				}, {
+					value: "120102",
+					text: "120102"
+				}, {
+					value: "120104",
+					text: "120104"
+				}]
+			}])
+			picker.pickers[0].setSelectedIndex(0, 1000);
+			
+			picker.show(function(SelectedItem) {
+				var deviceNo=SelectedItem[1].value;
+				jQuery(".deviceNo").html(deviceNo)
+			})
+		})
+	</script>
+
+</html>

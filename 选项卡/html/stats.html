@@ -1,0 +1,236 @@
+<!doctype html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title>数据</title>
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<link href="../css/mui.min.css" rel="stylesheet" />
+		<link rel="stylesheet" type="text/css" href="../css/icons-extra.css" />
+		<link rel="stylesheet" type="text/css" href="../css/mui.picker.min.css" />
+		<link rel="stylesheet" type="text/css" href="../css/mui.poppicker.css" />
+		<style type="text/css">
+			html,
+			body,
+			#pullrefresh,
+			.mui-content {
+				width: 100%;
+				height: 100%;
+				margin: 0;
+				padding: 0;
+			}
+			
+			.mui-content {
+				background: url(../images/2.png)  center no-repeat;
+				background-size: 100% 100%;
+			}
+			
+			.msg {
+				padding: 20px 10px;
+				line-height: 2;
+				font-size: 3.5vw;
+				color: #fff;
+			}
+			
+			.gridBox ul,
+			.gridBox ul li,
+			.mui-media-body {
+				background: none !important;
+				border: none !important;
+				color: #f8f8f8 !important;
+			}
+			
+			.gridBox ul li a {
+				padding: 4vw 0 !important;
+				background: rgba(12, 66, 123, 0.35) !important;
+				border-radius: 6px;
+			}
+			
+			.getDeviceNo {
+				margin-top: 20px;
+			}
+			
+			.mui-content>.mui-table-view:first-child {
+				margin-top: -1px;
+			}
+			
+			#pullrefresh {
+				overflow-x: hidden;
+			}
+			
+			.click {
+				text-align: center;
+			}
+		</style>
+	</head>
+
+	<body>
+		<!--下拉刷新容器-->
+		<div id="pullrefresh" class="mui-content mui-scroll-wrapper">
+			<div class="mui-scroll">
+				<!--数据列表-->
+				<div class="">
+					<div class="msg">
+						Vending machine background system
+						<br /> 售货机后台系统
+						<br /> 高效 快捷 稳定
+					</div>
+					<div class="gridBox">
+						<ul class="mui-table-view mui-grid-view mui-grid-9">
+							<li class="mui-table-view-cell mui-media mui-col-xs-4 mui-col-sm-4">
+								<a href="">
+									<span class="mui-icon mui-icon-home"></span>
+									<div class="mui-media-body">销量统计</div>
+								</a>
+							</li>
+							<li class="mui-table-view-cell mui-media mui-col-xs-4 mui-col-sm-4">
+								<a href="">
+									<span class="mui-icon mui-icon-email"><span class="mui-badge">5</span></span>
+									<div class="mui-media-body">商品统计</div>
+								</a>
+							</li>
+							<li class="mui-table-view-cell mui-media mui-col-xs-4 mui-col-sm-4">
+								<a href="#">
+									<span class="mui-icon mui-icon-chatbubble"></span>
+									<div class="mui-media-body">收益统计</div>
+								</a>
+							</li>
+							
+							<li class="mui-table-view-cell mui-media mui-col-xs-4 mui-col-sm-4">
+								<a href="#">
+									<span class="mui-icon mui-icon-info"></span>
+									<div class="mui-media-body">退款统计</div>
+								</a>
+							</li>
+							<li class="mui-table-view-cell mui-media mui-col-xs-4 mui-col-sm-4">
+								<a href="#">
+									<span class="mui-icon mui-icon-location"></span>
+									<div class="mui-media-body">损耗统计</div>
+								</a>
+							</li>
+							<li class="mui-table-view-cell mui-media mui-col-xs-4 mui-col-sm-4">
+								<a href="view.html">
+									<span class="mui-icon mui-icon-more"></span>
+									<div class="mui-media-body">补货统计</div>
+								</a>
+							</li>
+						</ul>
+					</div>
+				</div>
+			</div>
+
+		</div>
+
+		<script src="../js/mui.js"></script>
+		<script src="../js/jquery-3.2.1.min.js" type="text/javascript" charset="utf-8"></script>
+		<script src="../js/mui.picker.min.js" type="text/javascript" charset="utf-8"></script>
+		<script src="../js/mui.poppicker.js" type="text/javascript" charset="utf-8"></script>
+
+		<script type="text/javascript">
+			mui.init({
+				pullRefresh: {
+					container: '#pullrefresh',
+					down: {
+						style: 'circle',
+						callback: pulldownRefresh
+					}
+				}
+			});
+
+			/**
+			 * 下拉刷新具体业务实现
+			 */
+			function pulldownRefresh() {
+				setTimeout(function() {
+					console.log("正在刷新");
+					jQuery(".deviceNo").val("");
+					localStorage.removeItem("qrcode");
+					mui('#pullrefresh').pullRefresh().endPulldownToRefresh();
+					mui.toast("刷新成功。。。");
+				}, 1500);
+			}
+			//				设备状态详情
+			for(var i = 0; i < jQuery('ul li').length; i++) {
+				(function(i) {
+					jQuery('body .gridBox ul li:eq('+i+')').click(function() {
+						console.log(i)
+						mui.openWindow({
+							url: './pages/stats' + (i+1) + '.html',
+							id: '',
+							show: {
+								aniShow: 'pop-in'
+							},
+							waiting: {
+								autoShow: false
+							},
+							extras: {
+								data: jQuery(".deviceNo").val(),
+								type: jQuery(".deviceType").val()
+							}
+						});
+					})
+				})(i);
+			}
+			//			jQuery('body .gridBox li').click(function() {
+			//				console.log(jQuery(this).index());
+			//				switch(jQuery(this).index()) {
+			//					case 0:
+			//						mui.openWindow({
+			//							url: 'pages/stats1.html',
+			//							show: {
+			//								aniShow: 'pop-in'
+			//							},
+			//							waiting: {
+			//								autoShow: false
+			//							},
+			//							extras: {
+			//								data: jQuery(".deviceNo").val(),
+			//								type:jQuery(".deviceType").val()
+			//							}
+			//						});
+			//						break;
+			//					case 1:
+			//						mui.openWindow({
+			//							url: 'view.html',
+			//							show: {
+			//								aniShow: 'pop-in'
+			//							},
+			//							waiting: {
+			//								autoShow: false
+			//							},
+			//							extras: {
+			//								data: jQuery(".deviceNo").val(),
+			//								type:jQuery(".deviceType").val()
+			//							}
+			//						});
+			//						break;
+			//					default:
+			//						break;
+			//				}
+			//				//					document.location.href = this.href;
+			//
+			//			});
+
+			mui.plusReady(function() {
+			
+				jQuery(".click").click(function() {
+
+					var picker = new mui.PopPicker({
+						layer: 2
+					});
+					picker.setData(JSON.parse(localStorage.getItem("deviceData")))
+					picker.pickers[0].setSelectedIndex(0, 1000);
+
+					picker.show(function(SelectedItem) {
+						console.log(JSON.stringify(SelectedItem[0]))
+						var deviceType = SelectedItem[0].text;
+						var deviceNo = SelectedItem[1].value;
+						jQuery(".deviceNo").val(deviceNo)
+						jQuery(".deviceType").val(deviceType)
+					})
+				})
+			})
+		</script>
+	</body>
+
+</html>

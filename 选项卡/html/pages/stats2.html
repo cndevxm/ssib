@@ -1,0 +1,406 @@
+<!doctype html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title>商品统计</title>
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<link href="../../css/mui.min.css" rel="stylesheet" />
+		<link rel="stylesheet" type="text/css" href="../../css/mui.picker.min.css" />
+		<style type="text/css">
+			
+			.timebox button {
+				float: left;
+			}
+			.goods{
+				display: none;
+			}
+		</style>
+	</head>
+
+	<body>
+
+		<header class="mui-bar mui-bar-nav">
+			<a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
+			<h1 class="mui-title">商品统计</h1>
+		</header>
+		<div style="margin-top: 50px; padding: 10px 10px;">
+			<div id="segmentedControl" class="mui-segmented-control">
+				<a class="mui-control-item mui-active" href="#item1">
+					日
+				</a>
+				<a class="mui-control-item" href="#item2">
+					月
+				</a>
+				<a class="mui-control-item" href="#item3">
+					年
+				</a>
+			</div>
+		</div>
+		<div>
+			<div id="item1" class="mui-control-content mui-active">
+				<ul class="mui-table-view">
+					<li class="mui-table-view-cell beginTime">开始日期 <span class="mui-badge mui-badge-primary"></span></li>
+					<li class="mui-table-view-cell endTime">结束日期 <span class="mui-badge mui-badge-primary"></span></li>
+				</ul>
+				<button type="button" class="mui-btn mui-btn-primary mui-btn-block dataBtn">确定</button>
+			</div>
+			<div id="item2" class="mui-control-content">
+				<ul class="mui-table-view">
+					<li class="mui-table-view-cell beginTime">开始月份 <span class="mui-badge mui-badge-primary"></span></li>
+					<li class="mui-table-view-cell endTime">结束月份 <span class="mui-badge mui-badge-primary"></span></li>
+				</ul>
+				<button type="button" class="mui-btn mui-btn-primary mui-btn-block dataBtn">确定</button>
+			</div>
+			<div id="item3" class="mui-control-content">
+				<ul class="mui-table-view">
+					<li class="mui-table-view-cell beginTime">开始年份 <span class="mui-badge mui-badge-primary"></span></li>
+					<li class="mui-table-view-cell endTime">结束年份 <span class="mui-badge mui-badge-primary"></span></li>
+				</ul>
+				<button type="button" class="mui-btn mui-btn-primary mui-btn-block dataBtn">确定</button>
+
+			</div>
+
+		</div>
+		
+		<!-- 为 ECharts 准备一个具备大小（宽高）的 DOM -->
+		<div id="main" style="margin: 60px auto 50px;width:100%;min-height: 300px ;height:auto;"></div>
+		<ul class="mui-table-view">
+			<li class="mui-table-view-cell goods">选择商品 <span class="mui-badge mui-badge-primary"></span></li>
+		</ul>
+		<script src="../../js/mui.min.js"></script>
+		<script src="../../js/jquery-3.2.1.min.js" type="text/javascript" charset="utf-8"></script>
+		<script src="../../js/mui.picker.min.js" type="text/javascript" charset="utf-8"></script>
+		<script src="../../js/echarts.min.js" type="text/javascript" charset="utf-8"></script>
+		<script>
+		</script>
+
+		<script type="text/javascript">
+			mui.init();　
+			mui.plusReady(function() {; //7天前日期			
+				getMsg(getDay(-7)+"000000", getDay(0)+"235959", "3");
+				//关闭等待框
+				plus.nativeUI.closeWaiting();
+				//显示当前页面
+				mui.currentWebview.show();
+
+				function getDay(day) {
+					var today = new Date();
+					var targetday_milliseconds = today.getTime() + 1000 * 60 * 60 * 24 * day;
+
+					today.setTime(targetday_milliseconds); //注意，这行是关键代码
+
+					var tYear = today.getFullYear();
+					var tMonth = today.getMonth();
+					var tDate = today.getDate();
+					tMonth = doHandleMonth(tMonth + 1);
+					tDate = doHandleMonth(tDate);
+					return tYear + "" + tMonth + "" + tDate;
+				}
+
+				function doHandleMonth(month) {
+					var m = month;
+					if(month.toString().length == 1) {
+						m = "0" + month;
+					}
+					return m;
+				}
+				var index = 0;
+				var showType = "3";
+				var year, month, day, beginYear, beginMonth, beginDay, endYear, endMonth, endDay, beginTime, endTime;
+
+				function getData() {
+					var myDate = new Date();
+					year = myDate.getFullYear();
+					month = myDate.getMonth() + 1;
+					month < 10 ? month = "0" + month : month = month;
+					day = myDate.getDate();
+					day < 10 ? day = "0" + day : day = day;
+				}
+				getData();
+				jQuery('.beginTime span,.endTime span').html(year + "-" + month + "-" + day);
+				mui('#segmentedControl').on('tap', '.mui-control-item', function(event) {
+					getData();
+					index = jQuery(this).index();
+					console.log(year + "-" + month + "-" + day)
+					console.log(index)
+					switch(index) {
+						case 0:
+							showType = 3;
+							jQuery('.beginTime span,.endTime span').html(year + "-" + month + "-" + day);
+							break;
+						case 1:
+							showType = 2;
+							jQuery('.beginTime span,.endTime span').html(year + "-" + month);
+							break;
+						case 2:
+							showType = 1;
+							jQuery('.beginTime span,.endTime span').html(year);
+							break;
+						default:
+							alert("出现故障，请联系客服");
+							break;
+					}
+				})
+
+				jQuery('.beginTime,.endTime').click(function() {
+					if(jQuery(this).hasClass("beginTime")) {
+						var thisDom = jQuery(".beginTime").find("span");
+					} else if(jQuery(this).hasClass("endTime")) {
+						var thisDom = jQuery(".endTime").find("span");
+					}
+					var myDate = new Date();
+					switch(index) {
+						case 0:
+							showType = 3;
+							myDate.setFullYear(year, month, day);
+							var dtpicker = new mui.DtPicker({
+								type: "date", //设置日历初始视图模式 
+								beginDate: new Date(2018, 06, 01), //设置开始日期 
+								endDate: myDate, //设置结束日期 
+								labels: ['Year', 'Mon', 'Day'], //设置默认标签区域提示语 				
+							})
+							dtpicker.show(function(e) {
+								console.log(JSON.stringify(e));
+								dataYear = e.y.value;
+								dataMonth = e.m.value;
+								dataDay = e.d.value;
+								console.log(dataYear + dataMonth + dataDay);
+								thisDom.html(dataYear + "-" + dataMonth + "-" + dataDay)
+							})
+							break;
+						case 1:
+							showType = 2;
+							myDate.setFullYear(year, month);
+							var dtpicker = new mui.DtPicker({
+								type: "month", //设置日历初始视图模式 
+								beginDate: new Date(2018, 06), //设置开始日期 
+								endDate: myDate, //设置结束日期 
+								labels: ['Year', 'Mon'], //设置默认标签区域提示语 				
+							})
+							dtpicker.show(function(e) {
+								console.log(JSON.stringify(e));
+								dataYear = e.y.value;
+								dataMonth = e.m.value;
+								thisDom.html(dataYear + "-" + dataMonth)
+							})
+							break;
+						case 2:
+							showType = 1;
+							myDate.setFullYear(year);
+							var dtpicker = new mui.DtPicker({
+								type: "year", //设置日历初始视图模式 
+								beginDate: new Date(2017), //设置开始日期 
+								endDate: myDate, //设置结束日期 
+								labels: ['Year'], //设置默认标签区域提示语 				
+							})
+							dtpicker.show(function(e) {
+								console.log(JSON.stringify(e));
+								dataYear = e.y.value;
+								thisDom.html(dataYear)
+							})
+							break;
+						default:
+							alert("网络异常")
+							break;
+					}
+
+				})
+				jQuery(".dataBtn").click(function() {
+					var data;
+					switch(showType) {
+						case 1:
+							beginTime = jQuery('.beginTime span').html().replace(/-/g, "") + "0101000000";
+							endTime = jQuery('.endTime span').html().replace(/-/g, "") + "1231235959";
+
+							break;
+						case 2:
+							beginTime = jQuery('.beginTime span').html().replace(/-/g, "") + "01000000";
+							endTime = jQuery('.endTime span').html().replace(/-/g, "") + "31235959";
+
+							break;
+						case 3:
+							beginTime = jQuery('.beginTime span').html().replace(/-/g, "") + "000000";
+							endTime = jQuery('.endTime span').html().replace(/-/g, "") + "235959";
+
+							break;
+						default:
+							break;
+					}
+					getMsg(beginTime, endTime, showType);
+				})
+
+				function getMsg(beginTime, endTime, showType) {
+					console.log(beginTime)
+					console.log(endTime)
+					console.log(showType)
+					mui.ajax(url + "/api/app/statistics/goods?token=" + localStorage.getItem("token"), {
+						data: {
+							beginTime: beginTime,
+							endTime: endTime,
+							showType: showType,
+							deviceNo: jQuery('.deviceNo').val()
+						},
+						dataType: 'json', //服务器返回json格式数据
+						type: 'post', //HTTP请求类型
+						timeout: 10000, //超时时间设置为10秒；
+						headers: {
+							'Content-Type': 'application/json'
+						},
+						success: function(data) {
+							//服务器返回响应，根据响应结果，分析是否登录成功；
+							console.log(JSON.stringify(data));
+							var legendData = [];
+							var seriesData = [];
+							if(data.success == true) {
+								data.object.forEach(function(value, index) {
+									legendData.push(value.goods_name);
+									seriesData.push({
+										name: value.goods_name,
+										type: 'bar',
+										data: [value.sale_quantity, value.sale_quantity + 15, value.sale_quantity + 7, value.sale_quantity + 20, value.sale_quantity + 4, value.sale_quantity + 15, value.sale_quantity + 7, value.sale_quantity + 20, value.sale_quantity + 4, value.sale_quantity + 15, value.sale_quantity + 7, value.sale_quantity + 20, value.sale_quantity + 4, value.sale_quantity + 15, value.sale_quantity + 7, value.sale_quantity + 20, value.sale_quantity + 4, value.sale_quantity + 15, value.sale_quantity + 7, value.sale_quantity + 20, value.sale_quantity + 4, value.sale_quantity + 15, value.sale_quantity + 7, value.sale_quantity + 20, value.sale_quantity + 4, value.sale_quantity + 15, value.sale_quantity + 7, value.sale_quantity + 20, value.sale_quantity + 4, value.sale_quantity + 15, value.sale_quantity + 7, value.sale_quantity + 20, value.sale_quantity + 4, value.sale_quantity + 15, value.sale_quantity + 7, value.sale_quantity + 20, value.sale_quantity + 4, value.sale_quantity + 15, value.sale_quantity + 7, value.sale_quantity + 20, value.sale_quantity + 4, value.sale_quantity + 15, value.sale_quantity + 7, value.sale_quantity + 20, value.sale_quantity + 4, value.sale_quantity + 15, value.sale_quantity + 7, value.sale_quantity + 20, value.sale_quantity + 4],
+										markPoint: {
+											data: [{
+													type: 'max',
+													name: '最大值'
+												},
+												{
+													type: 'min',
+													name: '最小值'
+												}
+											]
+										},
+										markLine: {
+											data: [{
+												type: 'average',
+												name: '平均值'
+											}]
+										}
+									})
+
+								});
+								showEcharts(legendData.slice(0, 1), seriesData.slice(0, 1), ['1', '2', '3', '4', '5', '6', '7', '8', '9', '2', '3', '4', '5', '6', '7', '8', '9', '2', '3', '4', '5', '6', '7', '8', '9', '2', '3', '4', '5', '6', '7', '8', '9', '2', '3', '4', '5', '6', '7', '8', '9', '2', '3', '4', '5', '6', '7', '8', '9']);
+
+								jQuery(".goods").click(function() {
+									var picker = new mui.PopPicker({
+										layer: 1
+									});
+									picker.setData(legendData)
+									picker.pickers[0].setSelectedIndex(0, 1000);
+
+									picker.show(function(SelectedItem) {
+										console.log(JSON.stringify(SelectedItem))
+										var goodsName = SelectedItem[0];
+										jQuery('.goods span').html(goodsName)
+										var index;
+										legendData.forEach(function(val, i) {
+											if(goodsName == val) {
+												index = i;
+											}
+										})
+
+										showEcharts(legendData.slice(index, index + 1), seriesData.slice(index, index + 1), ['1', '2', '3', '4', '5', '6', '7', '8', '9', '2', '3', '4', '5', '6', '7', '8', '9', '2', '3', '4', '5', '6', '7', '8', '9', '2', '3', '4', '5', '6', '7', '8', '9', '2', '3', '4', '5', '6', '7', '8', '9', '2', '3', '4', '5', '6', '7', '8', '9']);
+									})
+								})
+
+								function showEcharts(legendData, seriesData, dateData) {
+									jQuery('.goods span').html(legendData);
+									jQuery('.goods').show();
+									//				echart
+									// 基于准备好的dom，初始化echarts实例
+									var myChart = echarts.init(document.getElementById('main'));
+
+									// 指定图表的配置项和数据
+
+									var option = {
+										dataZoom: [{
+												type: 'slider', //图表下方的伸缩条
+												show: true, //是否显示
+												realtime: true, //
+												start: 0, //伸缩条开始位置（1-100），可以随时更改
+												end: 20, //伸缩条结束位置（1-100），可以随时更改
+											},
+											{
+												type: 'inside', //鼠标滚轮
+												realtime: true,
+												//还有很多属性可以设置，详见文档
+											},
+										],
+										legend: {
+											orient: 'horizontal',
+											x: 'center',
+											top: 0,
+											data: legendData.slice(0, 1)
+										},
+										toolbox: {
+											show: true,
+											feature: {
+												dataView: {
+													show: true,
+													readOnly: false
+												},
+												magicType: {
+													show: true,
+													type: ['bar', 'line']
+												},
+												restore: {
+													show: true
+												},
+												saveAsImage: {
+													show: true
+												}
+											}
+										},
+										calculable: true,
+										xAxis: [{
+											type: 'category',
+											data: dateData
+										}],
+										yAxis: [{
+											type: 'value'
+										}],
+										series: seriesData.slice(0, 1)
+									};
+									// 使用刚指定的配置项和数据显示图表
+									myChart.setOption(option);
+									myChart.on('datazoom', function(params) {
+										//params里面有什么，可以打印出来看一下就明白
+										console.log(JSON.stringify(params));
+										//可以通过params获取缩放的起止百分比，但是鼠标滚轮和伸缩条拖动触发的params格式不同，所以用另一种方法
+										//获得图表数据数组下标
+										var startValue = myChart.getModel().option.dataZoom[0].startValue;
+										var endValue = myChart.getModel().option.dataZoom[0].endValue;
+										//获得起止位置百分比
+										var startPercent = myChart.getModel().option.dataZoom[0].start;
+										var endPercent = myChart.getModel().option.dataZoom[0].end;
+
+
+									})
+									//							自适应
+									window.onresize = myChart.resize;
+								}
+							} else if(data.error == "ERROR_INVALID_TOKEN") {
+								plus.nativeUI.toast('登录信息已过期，请重新登录');
+								mui.openWindow({
+									url: '../../login.html',
+									show: {
+										autoShow: true
+									}
+								});
+							} else {
+								alert(data.msg)
+							}
+						},
+						error: function(xhr, type, errorThrown) {
+							//异常处理；
+							console.log(type);
+							console.log(JSON.stringify(errorThrown))
+						}
+					});
+				}
+
+			})
+		</script>
+	</body>
+
+</html>

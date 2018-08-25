@@ -1,0 +1,173 @@
+<!doctype html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title>货柜管理</title>
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<link href="../../css/mui.min.css" rel="stylesheet" />
+		<style>
+			html,
+			body,
+			#pullrefresh,
+			.mui-content {
+				width: 100%;
+				height: 100%;
+				margin: 0;
+				padding: 0;
+			}
+			
+			.gridBox {
+				margin-top: 60px;
+			}
+			
+			.gridBox ul,
+			.gridBox ul li,
+			.mui-media-body {
+				background: none !important;
+				border: none !important;
+				color: #f8f8f8 !important;
+			}
+			
+			.gridBox ul li a {
+				padding: 24px 0 !important;
+				background: rgba(12, 66, 123, 0.35) !important;
+				border-radius: 6px;
+			}
+			
+			.mui-content {
+				background: url(../../images/2.png) center no-repeat;
+				background-size: 100% 100%;
+			}
+			
+			.mui-content>.mui-table-view:first-child {
+				margin-top: -1px;
+			}
+			
+			#pullrefresh {
+				overflow-x: hidden;
+			}
+			
+			#cvs {
+				display: block;
+				margin: 0 auto;
+			}
+			
+			.animatBox {
+				position: fixed;
+				bottom: 0;
+				left: 0;
+				width: 100%;
+			}
+		</style>
+	</head>
+
+	<body>
+
+		<header class="mui-bar mui-bar-nav">
+			<a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
+			<h1 class="mui-title">货柜管理</h1>
+		</header>
+		<!--下拉刷新容器-->
+		<div id="pullrefresh" class="mui-content mui-scroll-wrapper">
+			<div class="mui-scroll">
+				<!--数据列表-->
+				<div class="gridBox">
+					<ul class="mui-table-view mui-grid-view mui-grid-9">
+						<li class="mui-table-view-cell mui-media mui-col-xs-4 mui-col-sm-4">
+							<a href="#" class="standardize">
+								<span class="mui-icon mui-icon-home"></span>
+								<div class="mui-media-body">校准</div>
+							</a>
+						</li>
+						<li class="mui-table-view-cell mui-media mui-col-xs-4 mui-col-sm-4">
+							<a href="#">
+								<span class="mui-icon mui-icon-email">
+									<!--<span class="mui-badge">5</span>-->
+								</span>
+								<div class="mui-media-body">温控设置</div>
+							</a>
+						</li>
+
+					</ul>
+					<!--<audio src="../../images/ing.mp3" controls="controls" preload id="music" hidden></audio>-->
+				</div>
+
+			</div>
+
+			<div class="animatBox">
+				<div id="demo1" class="mui-progressbar">
+					<span></span>
+				</div>
+				<canvas id="cvs"></canvas>
+				<audio src="../../images/ing.mp3" id="audio"></audio>
+			</div>
+		</div>
+		<script src="../../js/mui.min.js"></script>
+		<script src="../../js/jquery-3.2.1.min.js" type="text/javascript" charset="utf-8"></script>
+		<script type="text/javascript">
+			mui.init()
+			mui("#demo1").progressbar({
+				progress: 20
+			}).show();
+			jQuery('.standardize').click(function() {
+				window.AudioContext = window.AudioContext || window.webkitAudioContext || window.mozAudioContext;
+
+				var audio;
+				if(typeof window.AudioContext != 'undefined') {
+					audio = document.getElementById('audio');
+					var ctx = new AudioContext();
+					var analyser = ctx.createAnalyser();
+					var audioSrc = ctx.createMediaElementSource(audio);
+					audioSrc.connect(analyser);
+					analyser.connect(ctx.destination);
+					var frequencyData = new Uint8Array(analyser.frequencyBinCount);
+					var cvs = document.getElementById('cvs');
+					cvs.width = 300;
+					cvs.height = 260;
+					var cwidth = cvs.width,
+						cheight = cvs.height,
+						meterWidth = 3, //柱宽
+						gap = 4, //柱间距
+						capHeight = 1, //顶子的高度
+						capStyle = '#fff',
+						meterNum = 1500 / 10, //count of the meters
+						capYPositionArray = []; ////store the vertical position of hte caps for the preivous frame
+					ctx = cvs.getContext('2d');
+					// loop
+					function renderFrame() {
+						var array = new Uint8Array(analyser.frequencyBinCount);
+						analyser.getByteFrequencyData(array);
+						var step = Math.round(array.length / meterNum); //sample limited data from the total array
+						ctx.clearRect(0, 0, cwidth, cheight);
+						for(var i = 0; i < meterNum; i++) {
+							var value = array[i * step];
+							if(capYPositionArray.length < Math.round(meterNum)) {
+								capYPositionArray.push(value);
+							};
+							ctx.fillStyle = capStyle;
+							//draw the cap, with transition effect
+							if(value < capYPositionArray[i]) {
+								ctx.fillRect(i * (meterWidth + gap), cheight - (--capYPositionArray[i]), meterWidth, capHeight);
+							} else {
+								ctx.fillRect(i * (meterWidth + gap), cheight - value, meterWidth, capHeight);
+								capYPositionArray[i] = value;
+							};
+							ctx.fillStyle = '#90c400'; //set the filllStyle to gradient for a better look
+							ctx.fillRect(i * (meterWidth + gap), cheight - value + capHeight, meterWidth, cheight); //the meter
+						}
+						requestAnimationFrame(renderFrame);
+					}
+
+				}
+
+//				audio.play();
+				renderFrame();
+				if(audio.currentTime < 5) {
+					audio.currentTime = 0;
+				}
+			})
+		</script>
+	</body>
+
+</html>
