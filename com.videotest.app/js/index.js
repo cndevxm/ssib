@@ -66,8 +66,8 @@ $(function() {
 			success: function(result) {
 				console.log(JSON.stringify(result))
 				alert(JSON.stringify(result))
-				if(result.success == true) {
-					//				if(result.code == 0) {
+//				if(result.success == true) {
+				if(result.code == 0) {
 					console.log(target);
 					var ws = new ReconnectingWebSocket(target);
 
@@ -172,7 +172,7 @@ $(function() {
 			if(type == "update") {
 				var html = "";
 			} else if(type == "final") {
-				var html = '<div class="top1"><p>提示：若出现故障致出货失败，系统将在审核后自动退款</p><img th:src="@{/ssib/image/shoppingCart.png}" src="../../static/ssib/image/shoppingCart.png" alt=""><div class="center"><p>订单编号：<span></span></p><p>订单金额：<span></span></p><p>订单时间：<span></span></p></div></div></div>';
+				var html = '<div class="top1"><p>提示：若出现故障致出货失败，系统将在审核后自动退款</p><img th:src="@{/ssib/image/shoppingCart.png}" src="../../static/ssib/image/shoppingCart.png" alt=""></div>';
 			}
 
 			for(var i = 0; i < list.length; i++) {
