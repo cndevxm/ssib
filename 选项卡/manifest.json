@@ -607,6 +607,13 @@
 					"login.html"
 				],
 				"priority": 0
+			},
+			"html/pages/view2.html": {
+				"resources": [],
+				"refer": [
+					"html/view.html"
+				],
+				"priority": 0
 			}
 		},
 		"idle": {

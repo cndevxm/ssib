@@ -56,7 +56,6 @@
 		<script src="../../js/mui.js"></script>
 		<script src="../../js/jquery-3.2.1.min.js" type="text/javascript" charset="utf-8"></script>
 		<script type="text/javascript">
-			
 			mui.init()
 
 			mui.plusReady(function() {
@@ -70,58 +69,24 @@
 				var device1 = device2 = device3 = 0;
 				var arr1 = arr2 = arr3 = arr4 = [];
 				deviceMsg.forEach(function(val, index) {
-
-					//										console.log(JSON.stringify(val), index, this);
-					var state, type, city = html = "";
-					if(val.state == 0) {
-						state = "在线";
-					} else {
-						state = "离线";
-					}
-					if(val.type == 1) {
-						type = "弹簧柜";
-					} else if(val.type == 2) {
-						type = "RFID柜";
-					} else if(val.type == 3) {
-						type = "重力柜";
-					}
-
-					if(val.province + val) {
-						city += val.province;
-					}
-					if(val.city) {
-						city += val.city;
-					}
-					if(val.disctinct) {
-						city += val.disctinct;
-					}
-					html = '<li class="mui-table-view-cell mui-transitioning"><div class="mui-slider-right mui-disabled"><a class="mui-btn mui-btn-grey" style="transform: translate(0px, 0px);">补货</a><a class="mui-btn mui-btn-yellow" style="transform: translate(-90px, 0px);">全部补满</a><a class="mui-btn mui-btn-red" style="transform: translate(-180px, 0px);">全部清空</a></div><div class="mui-slider-handle" style="transform: translate(0px, 0px);"><div class="mui-table-cell">' + val.number + '</div></div></li>';
-					//html = '<li class="mui-table-view-cell mui-transitioning"><div class="mui-slider-right mui-disabled"><a  href="#device' + val.number + '" class="mui-btn mui-btn-grey " style="transform: translate(0px, 0px);">详情</a><a class="mui-btn mui-btn-yellow" style="transform: translate(-90px, 0px);">操作</a><a class="mui-btn mui-btn-red" style="transform: translate(-180px, 0px);">全部补满</a></div><div class="mui-slider-handle" style="transform: translate(0px, 0px);"><div class="mui-table-cell">' + val.number + '</div></div></li><div id="device' + val.number + '" class="mui-popover"><ul class="mui-table-view"><li class="mui-table-view-cell">设备号：<span class="mui-badge">' + val.number + '</span></li><li class="mui-table-view-cell">设备类型：<span class="mui-badge">' + type + '</span></li><li class="mui-table-view-cell">设备状态：<span class="mui-badge">' + state + '</span></li><li class="mui-table-view-cell">设备位置：<span class="mui-badge">' + city + '</span></li><li class="mui-table-view-cell">经纬度：<span class="mui-badge">' + val.longitude + ',' + val.latitade + '</span></li></ul></div>';
+					var html = '<li class="mui-table-view-cell mui-transitioning"><div class="mui-slider-right mui-disabled"><a class="mui-btn mui-btn-grey" style="transform: translate(0px, 0px);">补货</a><a class="mui-btn mui-btn-yellow" style="transform: translate(-90px, 0px);">全部补满</a><a class="mui-btn mui-btn-red" style="transform: translate(-180px, 0px);">全部清空</a></div><div class="mui-slider-handle" style="transform: translate(0px, 0px);"><div class="mui-table-cell">' + val.number + '</div></div></li>';
+					var html1 = '<li class="mui-table-view-cell mui-transitioning"><div class="mui-slider-right mui-disabled"><a class="mui-btn mui-btn-grey" style="transform: translate(0px, 0px);">补货</a><a class="mui-btn mui-btn-yellow" style="transform: translate(-90px, 0px);">换货</a><a class="mui-btn mui-btn-red" style="transform: translate(-180px, 0px);">撤货</a></div><div class="mui-slider-handle" style="transform: translate(0px, 0px);"><div class="mui-table-cell">' + val.number + '</div></div></li>';
 					if(val.type == 1) {
 						device1++;
 						arr1.push(val.number);
-						//						jQuery('.arr1').append('<li class="mui-table-view-cell"><a class="mui-navigate-right" href="#">'+val.number+'</a></li>');
-						//						jQuery('.arr2').append('<li class="mui-table-view-cell mui-transitioning"><div class="mui-slider-right mui-disabled"><a class="mui-btn mui-btn-grey" style="transform: translate(0px, 0px);">详情</a><a class="mui-btn mui-btn-yellow" style="transform: translate(-90px, 0px);">补货</a><a class="mui-btn mui-btn-red" style="transform: translate(-180px, 0px);">删除</a></div><div class="mui-slider-handle" style="transform: translate(0px, 0px);"><div class="mui-table-cell">' + val.number + '</div></div></li>');
 						jQuery('.arr1').append(html);
 
 					} else if(val.type == 2) {
 						device2++;
 						arr2.push(val.number);
-						jQuery('.arr2').append(html);
+						jQuery('.arr2').append(html1);
 					} else if(val.type == 3) {
 						device3++;
 						arr3.push(val.number);
-						jQuery('.arr3').append(html);
-					}
-					//					货柜号以后加
-					//					arr4.push(val.cabinetNo);
+						jQuery('.arr3').append(html1);
+					}					
 				});
-				//				var ret = [];
-				//				for(var i = 0, j = arr4.length; i < j; i++) {
-				//					if(ret.indexOf(arr4[i]) === -1) {
-				//						ret.push(arr4[i]);
-				//					}
-				//				}
+				
 				jQuery('.device1').html(device1);
 				jQuery('.device2').html(device2);
 				jQuery('.device3').html(device3);
@@ -141,24 +106,21 @@
 				})
 				jQuery('.mui-btn-yellow').on('click', function(e) {
 					mask.show()
-
-					mui.ajax(url + "/api/app/aisle/fillGoods?token=" + localStorage.getItem("token"), {
+					var deviceNo = jQuery(this).parent("div").siblings(".mui-slider-handle").find("div").html();
+					var cabinetNo = 1;
+					jQuery.ajax({
+						url: url + "/api/app/aisle/goodsManage/fillCabinet?token=" + localStorage.getItem("token"),
 						data: {
-							deviceNo: jQuery(this).parent("div").siblings(".mui-slider-handle").find("div").html(),
-							number: [1]
+							deviceNo: deviceNo,
+							cabinetNo: cabinetNo
 						},
 						dataType: 'json', //服务器返回json格式数据
 						type: 'post', //HTTP请求类型
-						timeout: 10000, //超时时间设置为10秒；
-						headers: {
-							'Content-Type': 'application/json'
-						},
 						success: function(data) {
 							//服务器返回响应，根据响应结果，分析是否登录成功；
 							console.log(JSON.stringify(data));
 
-							if(data.success == true) {
-								console.log(JSON.stringify(data));
+							if(data.code == 0) {
 								mui.toast('补货成功', {
 									duration: 'long',
 									type: 'div'
@@ -166,7 +128,7 @@
 								mask.close()
 
 								//								mui.back();
-							} else if(data.error == "ERROR_INVALID_TOKEN") {
+							} else if(data.code == 500 && data.msg == "令牌已经失效,请重新登录") {
 								plus.nativeUI.toast('登录信息已过期，请重新登录');
 								mui.openWindow({
 									url: '../../login.html',
@@ -175,46 +137,50 @@
 									}
 								});
 							} else {
-								alert(data.msg)
+								mui.toast(data.msg)
 							}
 						},
 						error: function(xhr, type, errorThrown) {
 							//异常处理；
 							console.log(type);
 							console.log(JSON.stringify(errorThrown))
+							plus.nativeUI.toast('网络连接错误，请重新登录');
+							mui.openWindow({
+								url: '../../login.html',
+								show: {
+									autoShow: true
+								}
+							});
 						}
 					})
 				})
 
 				jQuery('.mui-btn-red').on('click', function(e) {
 					mask.show()
-
-					mui.ajax(url + "/api/app/aisle/clearGoods?token=" + localStorage.getItem("token"), {
+					var deviceNo = jQuery(this).parent("div").siblings(".mui-slider-handle").find("div").html();
+					var cabinetNo = 1;
+					console.log(deviceNo)
+					jQuery.ajax({
+						url: url + "/api/app/aisle/goodsManage/emptyCabinet?token=" + localStorage.getItem("token"),
 						data: {
-							deviceNo: jQuery(this).parent("div").siblings(".mui-slider-handle").find("div").html(),
-							number: [1]
+							deviceNo: deviceNo,
+							cabinetNo: cabinetNo
 						},
 						dataType: 'json', //服务器返回json格式数据
 						type: 'post', //HTTP请求类型
-						timeout: 10000, //超时时间设置为10秒；
-						headers: {
-							'Content-Type': 'application/json'
-						},
 						success: function(data) {
 							//服务器返回响应，根据响应结果，分析是否登录成功；
 							console.log(JSON.stringify(data));
 
-							if(data.success == true) {
+							if(data.code == 0) {
 								mui.toast('补货成功', {
 									duration: 'long',
 									type: 'div'
 								});
-
-								mask.close();
+								mask.close()
 								//								mui.back();
-							} else if(data.error == "ERROR_INVALID_TOKEN") {
+							} else if(data.code == 500 && data.msg == "令牌已经失效,请重新登录") {
 								plus.nativeUI.toast('登录信息已过期，请重新登录');
-								mask.closed(); //关闭遮罩层
 								mui.openWindow({
 									url: '../../login.html',
 									show: {
@@ -223,18 +189,23 @@
 								});
 							} else {
 								alert(data.msg)
-
 							}
 						},
 						error: function(xhr, type, errorThrown) {
 							//异常处理；
 							console.log(type);
 							console.log(JSON.stringify(errorThrown))
-
+							plus.nativeUI.toast('网络连接错误，请重新登录');
+							mui.openWindow({
+								url: '../../login.html',
+								show: {
+									autoShow: true
+								}
+							});
 						}
 					})
-
 				})
+
 				var mask = mui.createMask(); //遮罩层
 				jQuery('li ul li').on('click', function(e) {
 					if(jQuery(this).hasClass("mui-selected")) {

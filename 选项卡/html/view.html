@@ -69,14 +69,15 @@
 				mui.currentWebview.show();
 				var number = plus.webview.currentWebview().data;
 				var type = plus.webview.currentWebview().type;
+				var cabinetNo=1;
 				console.log(number)
 				console.log(type)
 				if(type == "弹簧柜") {
 					jQuery('.mui-btn-block,.aaa').css("display", "none")
 					var arr = [];
-					mui.ajax(url + "/api/app/aisle/aisleManage?token=" + localStorage.getItem("token"), {
+					mui.ajax(url + "/api/app/aisle/aisleManage?deviceNo="+number+"&cabinetNo="+cabinetNo+"&token=" + localStorage.getItem("token"), {
 						data: {
-							number: number
+							
 						},
 						dataType: 'json', //服务器返回json格式数据
 						type: 'post', //HTTP请求类型
@@ -88,16 +89,14 @@
 							//服务器返回响应，根据响应结果，分析是否登录成功；
 							console.log("---" + JSON.stringify(data));
 
-							if(data.success == true) {
-								data.object.aisles.forEach(function(val, index) {
+							if(data.code == 0) {
+								data.aisles.forEach(function(val, index) {
 									arr.push(val);
-									var state;
-									val.state == 0 ? state = "正常" : state = "关闭";
-									var html = '<li class="mui-table-view-cell"><div class="mui-table-cell"><img style="display:none" class="mui-media-object mui-pull-left" src="' + imgUrl + val.goodsPicture + '"><div class="mui-media-body">货道号:' + val.number + '<p class="mui-ellipsis"><span>商品:' + val.goodsName + '</span><span>货道容量:' + val.capacity + '</span><span>货道余量:' + val.storage + '</span><span>货道状态:' + state + '</span></p></div></li>'
+									var html = '<li class="mui-table-view-cell"><div class="mui-table-cell"><img style="display:none" class="mui-media-object mui-pull-left" src="' + imgUrl + val.goodsPicture + '"><div class="mui-media-body">货道号:' + val.aisleNo + '<p class="mui-ellipsis"><span>商品:' + val.goodsName + '</span><span>货道容量:' + val.capacity + '</span><span>货道余量:' + val.storage + '</span><span>价格:' + val.salePrice + '</span></p></div></li>'
 									//var html='<li class="mui-table-view-cell mui-transitioning mui-media mui-col-xs-6 mui-col-sm-6"><div class="mui-slider-right mui-disabled"><a class="mui-btn mui-btn-grey mui-icon mui-icon-person" style="transform: translate(0px, 0px);"></a><a class="mui-btn mui-btn-yellow mui-icon mui-icon-phone" style="transform: translate(-90px, 0px);"></a><a class="mui-btn mui-btn-red mui-icon mui-icon-email" style="transform: translate(-180px, 0px);"></a></div><div class="mui-slider-handle" style="transform: translate(0px, 0px);"><div class="mui-table-cell"><img class="mui-media-object mui-pull-left" src="' + imgUrl + val.goodsPicture + '"><div class="mui-media-body">货道号:' + val.number + '<p class="mui-ellipsis"><span>商品:' + val.goodsName + '</span><span>货道容量:' + val.capacity + '</span><span>货道余量:' + val.storage + '</span><span>货道状态:' + state + '</span>	</p></div></div></div></li>';
 									jQuery('.mui-table-view-chevron').append(html)
 								})
-							} else if(data.error == "ERROR_INVALID_TOKEN") {
+							} else if(data.code == 500 && data.msg=="令牌已经失效,请重新登录") {
 								plus.nativeUI.toast('登录信息已过期，请重新登录');
 								mui.openWindow({
 									url: '../login.html',
@@ -113,6 +112,13 @@
 							//异常处理；
 							console.log(type);
 							console.log(JSON.stringify(errorThrown))
+							plus.nativeUI.toast('网络连接错误，请重新登录');
+							mui.openWindow({
+								url: '../login.html',
+								show: {
+									autoShow: true
+								}
+							});
 						}
 					});
 				} else {
@@ -137,8 +143,6 @@
 
 						//连接成功建立的回调方法
 						ws.onopen = function(e) {
-							jQuery('p').append(JSON.stringify(e))
-							console.log(JSON.stringify(e))
 							mui.ajax(url + '/api/app/replenish/door?deviceNo=' + number + "&token=" + localStorage.getItem("token"), {
 
 								dataType: 'json', //服务器返回json格式数据
@@ -150,12 +154,22 @@
 								success: function(data) {
 									//服务器返回响应，根据响应结果，分析是否登录成功；
 									console.log(JSON.stringify(data));
-									jQuery('p').html(JSON.stringify(data))
+									jQuery('p').append(JSON.stringify(data))
+									
+									mui.toast(data.msg)
+									
 								},
 								error: function(xhr, type, errorThrown) {
 									//异常处理；
 									console.log(type);
 									console.log(JSON.stringify(errorThrown))
+							plus.nativeUI.toast('网络连接错误，请重新登录');
+							mui.openWindow({
+								url: '../login.html',
+								show: {
+									autoShow: true
+								}
+							});
 								}
 							});
 
@@ -163,20 +177,20 @@
 
 						//接收到消息的回调方法
 						ws.onmessage = function(event) {
-							jQuery('p').append(JSON.stringify(event))
-
 							var result = JSON.parse(event.data);
+							console.log(JSON.stringify(result))
 							var type = result.type;
-							var list = data.list;
 							if(type === "door") {
 								var success = result.success;
 								var msg = result.msg;
 								if(success === true) {
-									alert("开门成功，请补货");
+									mui.toast("开门成功，请补货");
 								}   
 							} else if(type === "replenishGoods") {
+								
+								var list = data.list;
 								if(list.length === 0) {
-									$("").html("未补货");
+									$("p").html("未补货");
 									return;
 								}
 								var html = '';
@@ -198,7 +212,6 @@
 
 						//连接关闭的回调方法
 						ws.onclose = function(e) {
-
 							jQuery('p').append(JSON.stringify(e))
 						};
 

@@ -16,9 +16,11 @@
 			#pullrefresh {
 				overflow-x: hidden;
 			}
-			#segmentedControl{
-				background-color: rgba(255,255,255,0);
+			
+			#segmentedControl {
+				background-color: rgba(255, 255, 255, 0);
 			}
+			
 			#segmentedControl .mui-control-item {
 				color: #F8F8F8;
 			}
@@ -47,23 +49,6 @@
 									</a>
 								</div>
 							</div>
-							<!--<div class="mui-row">
-								<div class="mui-col-sm-4 mui-col-xs-4">
-									<li class="mui-table-view-cell active">
-										当日收益
-									</li>
-								</div>
-								<div class="mui-col-sm-4 mui-col-xs-4">
-									<li class="mui-table-view-cell">
-										当月收益
-									</li>
-								</div>
-								<div class="mui-col-sm-4 mui-col-xs-4">
-									<li class="mui-table-view-cell">
-										当年收益
-									</li>
-								</div>
-							</div>-->
 						</div>
 						<div class="num">
 							<p class="amount">0.00</p>
@@ -136,16 +121,15 @@
 
 		<script type="text/javascript">
 			//			(function() {
+				var mask = mui.createMask(); //遮罩层
+					mask.show()
 			mui.plusReady(function() {
 
 				plus.screen.lockOrientation("portrait-primary");
-				//关闭等待框
-				plus.nativeUI.closeWaiting();
-				//显示当前页面
-				mui.currentWebview.show();
+
 				//					判断是否登陆
 				if(localStorage.getItem("token")) {
-					mui.toast('登陆成功', {
+					mui.toast('登陆验证通过', {
 						duration: 'long',
 						type: 'div'
 					})
@@ -173,14 +157,19 @@
 						}
 					}
 				});
+
+				//关闭等待框
+				plus.nativeUI.closeWaiting();
+				//显示当前页面
+				mui.currentWebview.show();
 				var deviceMsg;
 				//			上拉加载
 				function pullupRefresh() {
 					setTimeout(function() {
 						getDate();
-						getEarnings(dayTime, endTime);
+						getEarnings(dayTime, endTime,"3");
 						getDeviceMsg();
-					}, 1500);
+					}, 50);
 				}
 
 				//			  下拉刷新
@@ -188,13 +177,13 @@
 				function pulldownRefresh() {
 					setTimeout(function() {
 						getDate();
-						getEarnings(dayTime, endTime);
+						getEarnings(dayTime, endTime,"3");
 						getDeviceMsg();
 						mui('#pullrefresh').pullRefresh().endPulldownToRefresh();
 						jQuery('.active').removeClass("active");
 						jQuery('.mui-row div:first-child .mui-table-view-cell').addClass("active");
 						mui.toast("刷新成功。。。");
-					}, 1500);
+					}, 500);
 				}
 				//			初始化页面
 				//			获取时间
@@ -208,22 +197,27 @@
 					var hours = myDate.getHours(); //获取当前小时数(0-23)
 					var minutes = myDate.getMinutes(); //获取当前分钟数(0-59)
 					var seconds = myDate.getSeconds(); //获取当前秒数(0-59)
-					endTime = year + (month < 9 ? ("0" + (month + 1)) : ("" + (month + 1))) + (day < 10 ? "0" + day : "" + day) + (hours < 10 ? "0" + hours : "" + hours) + (minutes < 10 ? "0" + minutes : "" + minutes) + (seconds < 10 ? "0" + seconds : "" + seconds);
-					dayTime = year + (month < 9 ? ("0" + (month + 1)) : ("" + (month + 1))) + (day < 10 ? "0" + day : "" + day) + "000000";
-					monthTime = year + (month < 9 ? ("0" + (month + 1)) : ("" + (month + 1))) + "01000000";
-					yearTime = year + "0101000000";
+					endTime = year +"-"+  (month < 9 ? ("0" + (month + 1)) : ("" + (month + 1))) +"-"+  (day < 10 ? "0" + day : "" + day) +"-"+  (hours < 10 ? "0" + hours : "" + hours) +"-"+  (minutes < 10 ? "0" + minutes : "" + minutes) +"-"+ (seconds < 10 ? "0" + seconds : "" + seconds);
+					dayTime = year +"-"+ (month < 9 ? ("0" + (month + 1)) : ("" + (month + 1))) +"-"+ (day < 10 ? "0" + day : "" + day) + "-00-00-00";
+					monthTime = year +"-"+ (month < 9 ? ("0" + (month + 1)) : ("" + (month + 1))) + "-01-00-00-00";
+					yearTime = year + "-01-01-00-00-00";
 
 				}
 				//请求收益信息
-				function getEarnings(begin, end) {
-					mui.ajax(url + "/api/app/statistics/order?token=" + localStorage.getItem("token"), {
+				function getEarnings(beginTime, endTime, showType) {
+					console.log(beginTime)
+					console.log(endTime)
+					console.log(showType)
+					mui.ajax(url +"/api/app/statistics/order?token=" + localStorage.getItem("token"),{
+						type: 'post', //HTTP请求类型
+						async: false,
 						data: {
-							beginTime: begin,
-							endTime: end
-
+							beginTime: beginTime,
+							endTime: endTime,
+							showType: showType,
+							deviceNo: ""
 						},
 						dataType: 'json', //服务器返回json格式数据
-						type: 'post', //HTTP请求类型
 						timeout: 10000, //超时时间设置为10秒；
 						headers: {
 							'Content-Type': 'application/json'
@@ -232,25 +226,25 @@
 							//服务器返回响应，根据响应结果，分析是否登录成功；
 							console.log(JSON.stringify(data));
 
-							if(data.success == true) {
+							if(data.code == 0) {
 								var amount = wechartPercent = wechart = alipay = alipayPercent = 0;
-								if(data.object.length < 1) {
+								if(data.data.length < 1) {
 									mui.toast('暂无收益', {
 										duration: 'long',
 										type: 'div'
 									})
-								
+
 								} else {
-										if(data.object[0].wechat_sale_amount){
-											wechart = data.object[0].wechat_sale_amount;
-										}else{
-											wechart = 0;
-										}
-										if(data.object[0].alipay_sale_amount){
-											alipay = data.object[0].alipay_sale_amount;
-										}else{
-											alipay = 0;
-										}
+									if(data.data[0].wechatSaleAmount) {
+										wechart = Number(data.data[0].wechatSaleAmount);
+									} else {
+										wechart = 0;
+									}
+									if(data.data[0].alipaySaleAmount) {
+										alipay = Number(data.data[0].alipaySaleAmount);
+									} else {
+										alipay = 0;
+									}
 								}
 								amount = wechart + alipay;
 								amount = amount.toFixed(2);
@@ -285,7 +279,7 @@
 										}
 									}
 								}, 50)
-							} else if(data.error == "ERROR_INVALID_TOKEN") {
+							} else if(data.code == 500 && data.msg == "令牌已经失效,请重新登录") {
 								plus.nativeUI.toast('登录信息已过期，请重新登录');
 								mui.openWindow({
 									url: 'login.html',
@@ -300,6 +294,13 @@
 						error: function(xhr, type, errorThrown) {
 							//异常处理；
 							console.log(type);
+							plus.nativeUI.toast('网络连接错误，请重新登录');
+							mui.openWindow({
+								url: 'login.html',
+								show: {
+									autoShow: true
+								}
+							});
 						}
 					});
 				}
@@ -307,7 +308,8 @@
 				//				请求设备信息
 				function getDeviceMsg() {
 					var onlineNum = offlineNum = stockoutNum = faultNum = 0;
-					mui.ajax(url + "/api/app/device/no-list?token=" + localStorage.getItem("token"), {
+					console.log(url + "/api/app/device/no-list?token=" + localStorage.getItem("token"))
+					mui.ajax(url + "/api/app/device/query?token=" + localStorage.getItem("token"), {
 						data: {},
 						dataType: 'json', //服务器返回json格式数据
 						type: 'post', //HTTP请求类型
@@ -318,9 +320,9 @@
 						success: function(data) {
 							//服务器返回响应，根据响应结果，分析是否登录成功；
 							console.log(JSON.stringify(data));
-							if(data.success == true) {
-								deviceMsg = data.object;
-								var deviceNum = data.object.length;
+							if(data.code == 0) {
+								deviceMsg = data.data;
+								var deviceNum = data.data.length;
 								var deviceData = [];
 								deviceData[0] = {};
 								deviceData[0].value = "1";
@@ -335,32 +337,32 @@
 								deviceData[2].text = "重力柜";
 								deviceData[2].children = [];
 								for(var i = 0; i < deviceNum; i++) {
-									if(data.object[i].type == 1) {
+									if(data.data[i].type == 1) {
 										deviceData[0].children.push({
-											value: data.object[i].number,
-											text: data.object[i].number
+											value: data.data[i].number,
+											text: data.data[i].number
 										});
-									} else if(data.object[i].type == 2) {
+									} else if(data.data[i].type == 2) {
 										deviceData[1].children.push({
-											value: data.object[i].number,
-											text: data.object[i].number
+											value: data.data[i].number,
+											text: data.data[i].number
 										});
-									} else if(data.object[i].type == 3) {
+									} else if(data.data[i].type == 3) {
 										deviceData[2].children.push({
-											value: data.object[i].number,
-											text: data.object[i].number
+											value: data.data[i].number,
+											text: data.data[i].number
 										});
 									}
-									if(data.object[i].is_online == 0) {
+									if(data.data[i].isOnline == 1) {
 										onlineNum++;
-									} else if(data.object[i].is_online == 1) {
+									} else if(data.data[i].isOnline == 0) {
 										offlineNum++;
 									}
 
-									if(data.object[i].total > 0) {
+									if(data.data[i].state > 0) {
 										stockoutNum++;
 									}
-									if(data.object[i].state != 0) {
+									if(data.data[i].state != 0) {
 										faultNum++;
 									}
 								}
@@ -448,6 +450,8 @@
 										myChart.setOption(option);
 										//							自适应
 										window.onresize = myChart.resize;
+										
+										mask.close();
 										window.onresize = function() {
 											myChart.resize();
 										}
@@ -469,8 +473,8 @@
 										jQuery("." + classNames).parent("label").siblings("div").find("span").css("width", num / deviceNum * 100 + "%");
 									}
 								}
-
-							} else if(data.error == "ERROR_INVALID_TOKEN") {
+								
+							} else if(data.code == 500 && data.msg == "令牌已经失效,请重新登录") {
 								plus.nativeUI.toast('登录信息已过期，请重新登录');
 								mui.openWindow({
 									url: 'login.html',
@@ -486,6 +490,13 @@
 						error: function(xhr, type, errorThrown) {
 							//异常处理；
 							console.log(type);
+							plus.nativeUI.toast('网络连接错误，请重新登录');
+							mui.openWindow({
+								url: 'login.html',
+								show: {
+									autoShow: true
+								}
+							});
 						}
 					});
 				}
@@ -499,15 +510,15 @@
 					switch(index) {
 						case 0:
 							getDate();
-							getEarnings(dayTime, endTime);
+							getEarnings(dayTime, endTime,"3");
 							break;
 						case 1:
 							getDate();
-							getEarnings(monthTime, endTime);
+							getEarnings(monthTime, endTime,"2");
 							break;
 						case 2:
 							getDate();
-							getEarnings(yearTime, endTime);
+							getEarnings(yearTime, endTime,"1");
 							break;
 						default:
 							alert("网络问题，请重试")
@@ -546,7 +557,8 @@
 				//				getEarnings1();
 
 				function getEarnings1() {
-					mui.ajax(url + "/api/app/user/info?token=" + localStorage.getItem("token"), {
+					jQuery.ajax({
+						url:url + "/api/app/user/info?token=" + localStorage.getItem("token"), 
 						data: {
 
 						},
@@ -563,6 +575,13 @@
 						error: function(xhr, type, errorThrown) {
 							//异常处理；
 							console.log(type);
+							plus.nativeUI.toast('网络连接错误，请重新登录');
+							mui.openWindow({
+								url: 'login.html',
+								show: {
+									autoShow: true
+								}
+							});
 						}
 					});
 				}

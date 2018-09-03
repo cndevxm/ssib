@@ -28,7 +28,7 @@
 				width: 50px;
 				padding-left: 0;
 				padding-right: 0;
-			}
+			}			
 		</style>
 	</head>
 
@@ -40,7 +40,7 @@
 		<ul class="mui-table-view">
 			<li class="mui-table-view-cell">货道商品
 			</li>
-			<li class="mui-table-view-cell">柜号：
+			<li class="mui-table-view-cell">设备号：
 				<span class="mui-badge">0</span>
 			</li>
 			<li class="mui-table-view-cell">货道号：
@@ -50,9 +50,6 @@
 				<span class="mui-badge">0</span>
 			</li>
 			<li class="mui-table-view-cell">商品名称：
-				<span class="mui-badge">0</span>
-			</li>
-			<li class="mui-table-view-cell">原价：
 				<span class="mui-badge">0</span>
 			</li>
 			<li class="mui-table-view-cell">销售价：
@@ -67,14 +64,10 @@
 				<button type="button" class="mui-btn mui-btn-primary mui-btn-outlined add" style="position:absolute ;left: 50%;">&nbsp;+&nbsp;</button>
 				<button type="button" class="mui-btn removeAll" style="position:absolute ;left: 65%;">&nbsp;清零&nbsp;</button>
 				<button type="button" class="mui-btn mui-btn-primary addAll" style="position:absolute ;left: 80%;">&nbsp;补满&nbsp;</button>
-			</li>
-			<li class="mui-table-view-cell">货道状态：
-				<span class="mui-badge">0</span>
-			</li>
-			<li class="mui-table-view-cell">上架时间：
-				<span class="mui-badge">0</span>
-			</li>
+			</li>			
 		</ul>
+		<br />
+		<br />
 		<div class="mui-row" style="text-align: center;">
 			<button type="button" class="mui-btn mui-btn-primary sure">确定</button>
 			<button type="button" class="mui-btn back">返回</button>
@@ -97,25 +90,17 @@
 				//显示当前页面
 				mui.currentWebview.show();
 				var arr = plus.webview.currentWebview().data;
+				console.log(arr)
 				var deviceNo=plus.webview.currentWebview().deviceNo
 				console.log(JSON.stringify(arr));
-
-				jQuery('li:eq(1) span').html(arr.cabinetNo)
-				jQuery('li:eq(2) span').html(arr.number)
-				jQuery('li:eq(3) span').html(arr.goodsId)
+jQuery('li:eq(0) span').html(111)
+				jQuery('li:eq(1) span').html(arr.deviceNo)
+				jQuery('li:eq(2) span').html(arr.aisleNo)
+				jQuery('li:eq(3) span').html(arr.goodsNo)
 				jQuery('li:eq(4) span').html(arr.goodsName)
-				jQuery('li:eq(5) span').html(arr.costPrice)
-				jQuery('li:eq(6) span').html(arr.salePrice)
-				jQuery('li:eq(7) span').html(arr.capacity)
-				jQuery('li:eq(8) span').html(arr.storage)
-				if(arr.state == 0) {
-					jQuery('li:eq(9) span').html("正常")
-
-				} else {
-					jQuery('li:eq(9) span').html("异常")
-
-				}
-				jQuery('li:eq(10) span').html(fmtDate(arr.updateTime))
+				jQuery('li:eq(5) span').html(arr.salePrice)
+				jQuery('li:eq(6) span').html(arr.capacity)
+				jQuery('li:eq(7) span').html(arr.storage)
 
 				function fmtDate(obj) {
 					var date = new Date(obj);
@@ -126,32 +111,28 @@
 				}
 				jQuery('body').on('click', '.sure', function(e) {
 					var index = jQuery(this).index();
-					console.log(plus.webview.currentWebview().deviceNo);
-					mui.ajax(url + "/api/app/aisle/saveStorage?token=" + localStorage.getItem("token"), {
-						data: {
+					var data={
 							deviceNo: plus.webview.currentWebview().deviceNo,
-							number: arr.number,
-							storage: jQuery('li:eq(8) span').html()
-						},
+							aisleNo: arr.aisleNo,
+							storage: jQuery('li:eq(7) span').html()
+					};
+					console.log(JSON.stringify(data))
+					jQuery.ajax({
+						url:url + "/api/ssca/admin/goodsManage/setAisle?token=" + localStorage.getItem("token"),
+						data: data,
 						dataType: 'json', //服务器返回json格式数据
-						type: 'post', //HTTP请求类型
-						timeout: 10000, //超时时间设置为10秒；
-						headers: {
-							'Content-Type': 'application/json'
-						},
+						type: 'post', //HTTP请求类型					
 						success: function(data) {
 							//服务器返回响应，根据响应结果，分析是否登录成功；
 							console.log(JSON.stringify(data));
 
-							if(data.success == true) {
-								console.log(JSON.stringify(data));
-
+							if(data.code == 0) {
 								mui.toast('补货成功', {
 									duration: 'long',
 									type: 'div'
 								});
 								mui.back();
-							} else if(data.error == "ERROR_INVALID_TOKEN") {
+							} else if(data.code == 500 && data.msg=="令牌已经失效,请重新登录") {
 								plus.nativeUI.toast('登录信息已过期，请重新登录');
 								mui.openWindow({
 									url: '../login.html',
@@ -167,6 +148,13 @@
 							//异常处理；
 							console.log(type);
 							console.log(JSON.stringify(errorThrown))
+							plus.nativeUI.toast('网络连接错误，请重新登录');
+							mui.openWindow({
+								url: '../login.html',
+								show: {
+									autoShow: true
+								}
+							});
 						}
 					})
 				});
@@ -177,9 +165,9 @@
 					var num=jQuery('.num').html();
 					num=Number(num);
 					num++;
-					if(num>=Number(jQuery('li:eq(7) span').html())){
-						jQuery('.num').html(jQuery('li:eq(7) span').html())
-						num=jQuery('li:eq(7) span').html();
+					if(num>=Number(jQuery('li:eq(6) span').html())){
+						jQuery('.num').html(jQuery('li:eq(6) span').html())
+						num=jQuery('li:eq(6) span').html();
 					}else{
 						jQuery('.num').html(num)
 					}
@@ -198,31 +186,28 @@
 					
 				})
 				jQuery('.addAll').on('click', function(e) {
-
-					mui.ajax(url + "/api/app/aisle/saveStorage?token=" + localStorage.getItem("token"), {
-						data: {
+					var data={
 							deviceNo: plus.webview.currentWebview().deviceNo,
-							number: arr.number,
-							storage: jQuery('li:eq(7) span').html()
-						},
+							aisleNo: arr.aisleNo,
+							storage: jQuery('li:eq(6) span').html()
+					};
+					console.log(JSON.stringify(data))
+					jQuery.ajax({
+						url:url + "/api/app/aisle/goodsManage/setAisle?token=" + localStorage.getItem("token"), 
+						data: data,
 						dataType: 'json', //服务器返回json格式数据
 						type: 'post', //HTTP请求类型
-						timeout: 10000, //超时时间设置为10秒；
-						headers: {
-							'Content-Type': 'application/json'
-						},
 						success: function(data) {
 							//服务器返回响应，根据响应结果，分析是否登录成功；
 							console.log(JSON.stringify(data));
 
-							if(data.success == true) {
-								console.log(JSON.stringify(data));
+							if(data.code == 0) {
 								mui.toast('补货成功', {
 									duration: 'long',
 									type: 'div'
 								});
-//								mui.back();
-							} else if(data.error == "ERROR_INVALID_TOKEN") {
+								mui.back();
+							} else if(data.code == 500 && data.msg=="令牌已经失效,请重新登录") {
 								plus.nativeUI.toast('登录信息已过期，请重新登录');
 								mui.openWindow({
 									url: '../login.html',
@@ -238,36 +223,41 @@
 							//异常处理；
 							console.log(type);
 							console.log(JSON.stringify(errorThrown))
+							plus.nativeUI.toast('网络连接错误，请重新登录');
+							mui.openWindow({
+								url: '../login.html',
+								show: {
+									autoShow: true
+								}
+							});
 						}
 					})
 				})
 
 				jQuery('.removeAll').on('click', function(e) {
-
-					mui.ajax(url + "/api/app/aisle/saveStorage?token=" + localStorage.getItem("token"), {
-						data: {
+					var data={
 							deviceNo: plus.webview.currentWebview().deviceNo,
-							number: arr.number,
+							aisleNo: arr.aisleNo,
 							storage: "0"
-						},
+					};
+					console.log(JSON.stringify(data))
+					jQuery.ajax({
+						url:url + "/api/app/aisle/goodsManage/setAisle?token=" + localStorage.getItem("token"), 
+						data: data,
 						dataType: 'json', //服务器返回json格式数据
-						type: 'post', //HTTP请求类型
-						timeout: 10000, //超时时间设置为10秒；
-						headers: {
-							'Content-Type': 'application/json'
-						},
+						type: 'post', //HTTP请求类型						
 						success: function(data) {
 							//服务器返回响应，根据响应结果，分析是否登录成功；
 							console.log(JSON.stringify(data));
 
-							if(data.success == true) {
+							if(data.code == 0) {
 								console.log(JSON.stringify(data));
 								mui.toast('补货成功', {
 									duration: 'long',
 									type: 'div'
 								});
-//								mui.back();
-							} else if(data.error == "ERROR_INVALID_TOKEN") {
+								mui.back();
+							} else if(data.code == 500 && data.msg=="令牌已经失效,请重新登录") {
 								plus.nativeUI.toast('登录信息已过期，请重新登录');
 								mui.openWindow({
 									url: '../login.html',
@@ -283,6 +273,13 @@
 							//异常处理；
 							console.log(type);
 							console.log(JSON.stringify(errorThrown))
+							plus.nativeUI.toast('网络连接错误，请重新登录');
+							mui.openWindow({
+								url: '../login.html',
+								show: {
+									autoShow: true
+								}
+							});
 						}
 					})
 				})

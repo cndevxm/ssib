@@ -90,18 +90,19 @@
 
 		<script type="text/javascript">
 			mui.init();　
-			mui.plusReady(function() { 
+			mui.plusReady(function() {
 				//7天前日期
-				getMsg(getDay(-6)+"000000", getDay(-0)+"235959", "3"); 
+				getMsg(getDay(-6) + "-00-00-00", getDay(-0) + "-23-59-59", "3");
+				jQuery('.beginTime span').html(getDay(-6));
+				jQuery('.endTime span').html(getDay(-0));
 				//关闭等待框
 				plus.nativeUI.closeWaiting();
 				//显示当前页面
 				mui.currentWebview.show();
 
-				function getDay(day) {
-					
+				function getDay(day, type) {
+
 					var today = new Date();
-					console.log(today)
 					var targetday_milliseconds = today.getTime() + 1000 * 60 * 60 * 24 * day;
 
 					today.setTime(targetday_milliseconds); //注意，这行是关键代码
@@ -111,7 +112,9 @@
 					var tDate = today.getDate();
 					tMonth = doHandleMonth(tMonth + 1);
 					tDate = doHandleMonth(tDate);
-					return tYear + "" + tMonth + "" + tDate;
+
+					return tYear + "-" + tMonth + "-" + tDate;
+
 				}
 
 				function doHandleMonth(month) {
@@ -134,7 +137,7 @@
 					day < 10 ? day = "0" + day : day = day;
 				}
 				getData();
-				jQuery('.beginTime span,.endTime span').html(year + "-" + month + "-" + day);
+
 				mui('#segmentedControl').on('tap', '.mui-control-item', function(event) {
 					getData();
 					index = jQuery(this).index();
@@ -143,15 +146,25 @@
 					switch(index) {
 						case 0:
 							showType = 3;
-							jQuery('.beginTime span,.endTime span').html(year + "-" + month + "-" + day);
+							getMsg(getDay(-6) + "-00-00-00", getDay(-0) + "-23-59-59", "3");
+							jQuery('.beginTime span').html(getDay(-6));
+							jQuery('.endTime span').html(getDay(-0));
 							break;
 						case 1:
 							showType = 2;
-							jQuery('.beginTime span,.endTime span').html(year + "-" + month);
+							month1 = Number(month) - 1;
+							month1 < 1 ? month1 = 1 : month1 = month1;
+							month1 < 10 ? month1 = "0" + month1 : month1 = month1;
+							getMsg(year + "-" + month1 + "-01-00-00-00", year + "-" + month + "-31-24-59-59", showType)
+							jQuery('.beginTime span').html(year + "-" + month1);
+							jQuery('.endTime span').html(year + "-" + month);
+
 							break;
 						case 2:
 							showType = 1;
-							jQuery('.beginTime span,.endTime span').html(year);
+							getMsg(year - 1 + "-01-01-00-00-00", year + "-12-31-24-59-59", showType)
+							jQuery('.beginTime span').html(year - 1);
+							jQuery('.endTime span').html(year);
 							break;
 						default:
 							alert("出现故障，请联系客服");
@@ -223,27 +236,29 @@
 
 				})
 				jQuery(".dataBtn").click(function() {
-					var data;
+					console.log(showType)
+					console.log(jQuery('.beginTime span').html())
+					console.log(jQuery('.endTime span').html())
+					showType=Number(showType);
 					switch(showType) {
 						case 1:
-							beginTime = jQuery('.beginTime span').html().replace(/-/g, "") + "0101000000";
-							endTime = jQuery('.endTime span').html().replace(/-/g, "") + "1231235959";
-
+							beginTime = jQuery('.beginTime span').html() + "-01-01-00-00-00";
+							endTime = jQuery('.endTime span').html() + "-12-31-23-59-59";
 							break;
 						case 2:
-							beginTime = jQuery('.beginTime span').html().replace(/-/g, "") + "01000000";
-							endTime = jQuery('.endTime span').html().replace(/-/g, "") + "31235959";
-
+							beginTime = jQuery('.beginTime span').html() + "-01-00-00-00";
+							endTime = jQuery('.endTime span').html() + "-31-23-59-59";
 							break;
 						case 3:
-							beginTime = jQuery('.beginTime span').html().replace(/-/g, "") + "000000";
-							endTime = jQuery('.endTime span').html().replace(/-/g, "") + "235959";
-
+							beginTime = jQuery('.beginTime span').html() + "-00-00-00";
+							endTime = jQuery('.endTime span').html() + "-23-59-59";
+							
 							break;
 						default:
 							break;
 					}
 					getMsg(beginTime, endTime, showType);
+
 				})
 
 				function getMsg(beginTime, endTime, showType) {
@@ -267,32 +282,32 @@
 							//服务器返回响应，根据响应结果，分析是否登录成功；
 							console.log(JSON.stringify(data));
 
-							if(data.success == true) {
+							if(data.code == 0) {
 								var xAxis = [];
 								var series1 = [];
 								var series2 = [];
-								data.object.forEach(function(val, i) {
-									if(val.pay_time.length>5){
-										xAxis.push(val.pay_time.slice(5));
-									}else{
-										xAxis.push(val.pay_time);
+								data.data.forEach(function(val, i) {
+									if(val.payTime.length > 5) {
+										xAxis.push(val.payTime.slice(5));
+									} else {
+										xAxis.push(val.payTime);
 									}
-									
-									if(val.wechat_sale_amount){
-										series1.push(val.wechat_sale_amount)
-									}else{
+
+									if(val.wechatSaleAmount) {
+										series1.push(val.wechatSaleAmount)
+									} else {
 										series1.push(0)
 									}
-									if(val.alipay_sale_amount){
-										series2.push(val.alipay_sale_amount)
-									}else{
+									if(val.alipaySaleAmount) {
+										series2.push(val.alipaySaleAmount)
+									} else {
 										series2.push(0)
 									}
 								})
 								console.log(xAxis);
 								console.log(series1);
 								console.log(series2);
-//								
+								//								
 								//				echart
 								// 基于准备好的dom，初始化echarts实例
 								var myChart = echarts.init(document.getElementById('main'));
@@ -307,7 +322,7 @@
 										trigger: 'axis'
 									},
 									legend: {
-										data: ['微信','支付宝']
+										data: ['微信', '支付宝']
 									},
 									grid: {
 										left: '3%',
@@ -326,25 +341,23 @@
 									yAxis: {
 										type: 'value'
 									},
-									series: [
-										{
-											name: '支付宝',
-											type: 'line',
-											stack: '总量',
-											data: series2
-										},{
-											name: '微信',
-											type: 'line',
-											stack: '总量',
-											data: series1
-										}
-									]
+									series: [{
+										name: '支付宝',
+										type: 'line',
+										stack: '总量',
+										data: series2
+									}, {
+										name: '微信',
+										type: 'line',
+										stack: '总量',
+										data: series1
+									}]
 								};
 								// 使用刚指定的配置项和数据显示图表
 								myChart.setOption(option);
 								//							自适应
 								window.onresize = myChart.resize;
-							} else if(data.error == "ERROR_INVALID_TOKEN") {
+							} else if(data.code == 500 && data.msg == "令牌已经失效,请重新登录") {
 								plus.nativeUI.toast('登录信息已过期，请重新登录');
 								mui.openWindow({
 									url: '../../login.html',
@@ -360,6 +373,13 @@
 							//异常处理；
 							console.log(type);
 							console.log(JSON.stringify(errorThrown))
+							plus.nativeUI.toast('网络连接错误，请重新登录');
+							mui.openWindow({
+								url: '../../login.html',
+								show: {
+									autoShow: true
+								}
+							});
 						}
 					});
 				}

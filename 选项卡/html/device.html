@@ -35,6 +35,7 @@
 			input.deviceNo::-webkit-input-placeholder {
 				font-size: 14px;
 				text-align: left;
+				color: #F8F8F8;
 			}
 			
 			.gridBox ul,
@@ -66,6 +67,37 @@
 			.click,
 			.scan {
 				text-align: center;
+				float: left;
+				width: 50%;
+			}
+			
+			.gridBox {
+				display: none;
+				padding-top: 120px;
+			}
+			
+			.deviceCheck {
+				position: fixed;
+				top: 0;
+				left: 0;
+				width: 100%;
+				background: rgba(255, 255, 255, 0.1);
+			}
+			
+			.deviceCheck div,
+			.deviceCheck input,
+			.deviceCheck li,
+			.deviceMsg {
+				background: none;
+				color: #f8f8f8;
+			}
+			.deviceMsg{
+				text-align: center;
+				line-height: 1.4;
+			}
+			
+			.mui-table-view-cell:after{
+				left: 0;
 			}
 		</style>
 	</head>
@@ -76,14 +108,12 @@
 			<div class="mui-scroll">
 				<!--数据列表-->
 				<div class="">
-					<div class="msg">
-						Vending machine background system
-						<br /> 售货机后台系统
-						<br /> 高效 快捷 稳定
-					</div>
 					<div class="gridBox">
+						<p class="deviceMsg">
+									
+						</p>
 						<ul class="mui-table-view mui-grid-view mui-grid-9">
-							<li class="mui-table-view-cell mui-media mui-col-xs-4 mui-col-sm-4">
+							<li class="mui-table-view-cell mui-media mui-col-xs-4 mui-col-sm-4" style="display: none;">
 								<a href="">
 									<span class="mui-icon mui-icon-home"></span>
 									<div class="mui-media-body">货柜管理</div>
@@ -140,16 +170,15 @@
 								</a>
 							</li>
 						</ul>
+						<!--<div class="msg">
+						Vending machine background system
+						<br /> 售货机后台系统
+						<br /> 高效 快捷 稳定
+					</div>-->
 					</div>
 
 					<div class="getDeviceNo">
-						<!--<div class="mui-input-row">
-					<label>设备号</label>
-					<div id="deviceNo">
-
-					</div>
-				</div>-->
-						<ul class="mui-table-view">
+						<ul class="mui-table-view deviceCheck">
 							<div class="mui-input-row mui-table-view-divider">
 								<label>设备号：</label>
 								<input type="hidden" class="mui-input-clear deviceType">
@@ -177,7 +206,8 @@
 					down: {
 						style: 'circle',
 						callback: pulldownRefresh
-					}
+					},
+
 				}
 			});
 
@@ -262,19 +292,103 @@
 				//				获取扫码返回的二维码
 				window.addEventListener('scanMsg', function(e) {
 					var deviceNum = localStorage.getItem("qrcode");
+					getdeviceType(deviceNum);
+					localStorage.removeItem("qrcode")
+				});
+
+				function getdeviceType(deviceNum) {
 					var deviceData = localStorage.getItem("deviceData");
-					deviceData = JSON.parse(deviceData);
+					if(deviceData) {
+						deviceData = JSON.parse(deviceData);
+					} else {
+
+						mui.ajax(url + "/api/app/device/query?token=" + localStorage.getItem("token"), {
+							data: {},
+							dataType: 'json', //服务器返回json格式数据
+							type: 'post', //HTTP请求类型
+							timeout: 10000, //超时时间设置为10秒；
+							headers: {
+								'Content-Type': 'application/json'
+							},
+							success: function(data) {
+								//服务器返回响应，根据响应结果，分析是否登录成功；
+								console.log(JSON.stringify(data));
+								if(data.code == 0) {
+									deviceMsg = data.data;
+									var deviceNum = data.data.length;
+									deviceData = [];
+									deviceData[0] = {};
+									deviceData[0].value = "1";
+									deviceData[0].text = "弹簧柜";
+									deviceData[0].children = [];
+									deviceData[1] = {};
+									deviceData[1].value = "2";
+									deviceData[1].text = "RFID柜";
+									deviceData[1].children = [];
+									deviceData[2] = {};
+									deviceData[2].value = "3";
+									deviceData[2].text = "重力柜";
+									deviceData[2].children = [];
+									for(var i = 0; i < deviceNum; i++) {
+										if(data.data[i].type == 1) {
+											deviceData[0].children.push({
+												value: data.data[i].number,
+												text: data.data[i].number
+											});
+										} else if(data.data[i].type == 2) {
+											deviceData[1].children.push({
+												value: data.data[i].number,
+												text: data.data[i].number
+											});
+										} else if(data.data[i].type == 3) {
+											deviceData[2].children.push({
+												value: data.data[i].number,
+												text: data.data[i].number
+											});
+										}
+									};
+								} else if(data.code == 500 && data.msg == "令牌已经失效,请重新登录") {
+									plus.nativeUI.toast('登录信息已过期，请重新登录');
+									mui.openWindow({
+										url: 'login.html',
+										show: {
+											autoShow: true
+										}
+									});
+								} else {
+									alert(data.msg);
+									return;
+								}
+							},
+							error: function(xhr, type, errorThrown) {
+								//异常处理；
+								console.log(type);
+								plus.nativeUI.toast('网络连接错误，请重新登录');
+								mui.openWindow({
+									url: 'login.html',
+									show: {
+										autoShow: true
+									}
+								});
+							}
+						});
+					}
+
 					jQuery(".deviceNo").val(deviceNum);
 					for(var i = 0; i < deviceData.length; i++) {
 						for(var j = 0; j < deviceData[i].children.length; j++) {
 							if(deviceNum == deviceData[i].children[j].value) {
-								jQuery(".deviceType").val(deviceData[i].text)
+								jQuery(".deviceType").val(deviceData[i].text);
+								jQuery('.deviceMsg').html(deviceData[i].text + ":" + deviceNum);
+								jQuery('.gridBox').show();
+							} else {
+								mui.toast("无此设备，请确认后重新输入");
+								jQuery('.deviceNo').val('');
+								jQuery('.deviceNo').trigger("focus");
 							}
 						}
 					}
-					localStorage.removeItem("qrcode")
-				});
-
+				}
 				jQuery(".click").click(function() {
 					var picker = new mui.PopPicker({
 						layer: 2
@@ -286,10 +400,18 @@
 						console.log(JSON.stringify(SelectedItem[0]))
 						var deviceType = SelectedItem[0].text;
 						var deviceNo = SelectedItem[1].value;
-						jQuery(".deviceNo").val(deviceNo)
-						jQuery(".deviceType").val(deviceType)
+						jQuery(".deviceNo").val(deviceNo);
+						jQuery(".deviceType").val(deviceType);
+						jQuery('.deviceMsg').html(deviceType + ":" + deviceNo);
+						jQuery('.gridBox').show();
 					})
 				})
+				jQuery(".deviceNo").blur(function() {
+					var deviceNum = jQuery(this).val();
+
+					getdeviceType(deviceNum);
+				})
+
 			})
 		</script>
 	</body>

@@ -88,7 +88,7 @@
 
 					document.getElementById("clear").addEventListener("tap", function(event) {
 						localStorage.clear();
-
+						//登出
 						//						mui.ajax(url + "/api/app/user/logout", {
 						//							data: {
 						//								username: accountBox.value,
@@ -140,12 +140,10 @@
 					if(localStorage.getItem("autoLogin") == "true") {
 						document.getElementById("autoLogin").classList.add("mui-active");
 
-						//						plus.webview.currentWebview().hide();
 						var index = plus.webview.getLaunchWebview();
-						plus.webview.show(index);
+						plus.webview.reload(index);
 
 					} else if(localStorage.getItem("autoLogin") == "false") {
-						console.log("falsefalse");
 						document.getElementById("autoLogin").classList.remove("mui-active");
 
 					}
@@ -172,34 +170,30 @@
 								//服务器返回响应，根据响应结果，分析是否登录成功；
 								console.log(JSON.stringify(data));
 
-								if(data.success) {
+								if(data.code == 0) {
+
+									localStorage.setItem("token", data.data);
+
+									//									清除view
 									var vw_list = plus.webview.all();
 									for(var i = 0, len = vw_list.length; i < len; i++) {
-										console.log(vw_list[i].id)
 										var ws = plus.webview.getWebviewById(vw_list[i].id);
 										var length = vw_list[i].id.length - 10;
-										console.log(vw_list[i].id == "HBuilder")
-										console.log(vw_list[i].id.slice(length) == "login.html")
 										if(vw_list[i].id == "HBuilder") {
 											setTimeout(function() {
 												var index = plus.webview.getLaunchWebview();
 												index.reload();
-											}, 500)
-
+											}, 50)
 										} else if(vw_list[i].id.slice(length) == "login.html") {
 											plus.webview.hide(ws)
 											setTimeout(function() {
 												plus.webview.close(ws);
-											}, 500)
-										} else {											
+											}, 50)
+										} else {
 											plus.webview.close(ws);
 										}
 									}
-
-
-									localStorage.setItem("token", data.object);
-
-								} else if(data.error == "ERROR_INVALID_TOKEN") {
+								} else if(data.code != 0) {
 									alert("token获取失败")
 								} else {
 									alert(data.msg);
@@ -210,6 +204,7 @@
 								console.log(JSON.stringify(xhr));
 								console.log(type);
 								console.log(errorThrown);
+								mui.toast(xhr.status)
 							}
 						});
 

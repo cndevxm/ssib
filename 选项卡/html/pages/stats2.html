@@ -8,12 +8,8 @@
 		<link href="../../css/mui.min.css" rel="stylesheet" />
 		<link rel="stylesheet" type="text/css" href="../../css/mui.picker.min.css" />
 		<style type="text/css">
-			
 			.timebox button {
 				float: left;
-			}
-			.goods{
-				display: none;
 			}
 		</style>
 	</head>
@@ -62,12 +58,10 @@
 			</div>
 
 		</div>
-		
+
 		<!-- 为 ECharts 准备一个具备大小（宽高）的 DOM -->
-		<div id="main" style="margin: 60px auto 50px;width:100%;min-height: 300px ;height:auto;"></div>
-		<ul class="mui-table-view">
-			<li class="mui-table-view-cell goods">选择商品 <span class="mui-badge mui-badge-primary"></span></li>
-		</ul>
+		<div id="main" style="margin: 60px auto 50px;width:100%;min-height:500px;"></div>
+
 		<script src="../../js/mui.min.js"></script>
 		<script src="../../js/jquery-3.2.1.min.js" type="text/javascript" charset="utf-8"></script>
 		<script src="../../js/mui.picker.min.js" type="text/javascript" charset="utf-8"></script>
@@ -78,7 +72,9 @@
 		<script type="text/javascript">
 			mui.init();　
 			mui.plusReady(function() {; //7天前日期			
-				getMsg(getDay(-7)+"000000", getDay(0)+"235959", "3");
+				getMsg(getDay(-6) + "-00-00-00", getDay(0) + "-23-59-59", "3");
+				jQuery('.beginTime span').html(getDay(-6));
+				jQuery('.endTime span').html(getDay(-0));
 				//关闭等待框
 				plus.nativeUI.closeWaiting();
 				//显示当前页面
@@ -95,7 +91,7 @@
 					var tDate = today.getDate();
 					tMonth = doHandleMonth(tMonth + 1);
 					tDate = doHandleMonth(tDate);
-					return tYear + "" + tMonth + "" + tDate;
+					return tYear + "-" + tMonth + "-" + tDate;
 				}
 
 				function doHandleMonth(month) {
@@ -118,7 +114,7 @@
 					day < 10 ? day = "0" + day : day = day;
 				}
 				getData();
-				jQuery('.beginTime span,.endTime span').html(year + "-" + month + "-" + day);
+
 				mui('#segmentedControl').on('tap', '.mui-control-item', function(event) {
 					getData();
 					index = jQuery(this).index();
@@ -127,15 +123,25 @@
 					switch(index) {
 						case 0:
 							showType = 3;
-							jQuery('.beginTime span,.endTime span').html(year + "-" + month + "-" + day);
+							getMsg(getDay(-6) + "-00-00-00", getDay(-0) + "-23-59-59", "3");
+							jQuery('.beginTime span').html(getDay(-6));
+							jQuery('.endTime span').html(getDay(-0));
 							break;
 						case 1:
 							showType = 2;
-							jQuery('.beginTime span,.endTime span').html(year + "-" + month);
+							month1 = Number(month) - 1;
+							month1 < 1 ? month1 = 1 : month1 = month1;
+							month1 < 10 ? month1 = "0" + month1 : month1 = month1;
+							getMsg(year + "-" + month1 + "-01-00-00-00", year + "-" + month + "-31-24-59-59", showType)
+							jQuery('.beginTime span').html(year + "-" + month1);
+							jQuery('.endTime span').html(year + "-" + month);
+
 							break;
 						case 2:
 							showType = 1;
-							jQuery('.beginTime span,.endTime span').html(year);
+							getMsg(year - 1 + "-01-01-00-00-00", year + "-12-31-24-59-59", showType)
+							jQuery('.beginTime span').html(year - 1);
+							jQuery('.endTime span').html(year);
 							break;
 						default:
 							alert("出现故障，请联系客服");
@@ -207,21 +213,21 @@
 
 				})
 				jQuery(".dataBtn").click(function() {
-					var data;
+					showType = Number(showType)
 					switch(showType) {
 						case 1:
-							beginTime = jQuery('.beginTime span').html().replace(/-/g, "") + "0101000000";
-							endTime = jQuery('.endTime span').html().replace(/-/g, "") + "1231235959";
+							beginTime = jQuery('.beginTime span').html() + "-01-01-00-00-00";
+							endTime = jQuery('.endTime span').html() + "-12-31-23-59-59";
 
 							break;
 						case 2:
-							beginTime = jQuery('.beginTime span').html().replace(/-/g, "") + "01000000";
-							endTime = jQuery('.endTime span').html().replace(/-/g, "") + "31235959";
+							beginTime = jQuery('.beginTime span').html() + "-01-00-00-00";
+							endTime = jQuery('.endTime span').html() + "-31-23-59-59";
 
 							break;
 						case 3:
-							beginTime = jQuery('.beginTime span').html().replace(/-/g, "") + "000000";
-							endTime = jQuery('.endTime span').html().replace(/-/g, "") + "235959";
+							beginTime = jQuery('.beginTime span').html() + "-00-00-00";
+							endTime = jQuery('.endTime span').html() + "-23-59-59";
 
 							break;
 						default:
@@ -250,122 +256,102 @@
 						success: function(data) {
 							//服务器返回响应，根据响应结果，分析是否登录成功；
 							console.log(JSON.stringify(data));
+
 							var legendData = [];
 							var seriesData = [];
-							if(data.success == true) {
-								data.object.forEach(function(value, index) {
-									legendData.push(value.goods_name);
-									seriesData.push({
-										name: value.goods_name,
-										type: 'bar',
-										data: [value.sale_quantity, value.sale_quantity + 15, value.sale_quantity + 7, value.sale_quantity + 20, value.sale_quantity + 4, value.sale_quantity + 15, value.sale_quantity + 7, value.sale_quantity + 20, value.sale_quantity + 4, value.sale_quantity + 15, value.sale_quantity + 7, value.sale_quantity + 20, value.sale_quantity + 4, value.sale_quantity + 15, value.sale_quantity + 7, value.sale_quantity + 20, value.sale_quantity + 4, value.sale_quantity + 15, value.sale_quantity + 7, value.sale_quantity + 20, value.sale_quantity + 4, value.sale_quantity + 15, value.sale_quantity + 7, value.sale_quantity + 20, value.sale_quantity + 4, value.sale_quantity + 15, value.sale_quantity + 7, value.sale_quantity + 20, value.sale_quantity + 4, value.sale_quantity + 15, value.sale_quantity + 7, value.sale_quantity + 20, value.sale_quantity + 4, value.sale_quantity + 15, value.sale_quantity + 7, value.sale_quantity + 20, value.sale_quantity + 4, value.sale_quantity + 15, value.sale_quantity + 7, value.sale_quantity + 20, value.sale_quantity + 4, value.sale_quantity + 15, value.sale_quantity + 7, value.sale_quantity + 20, value.sale_quantity + 4, value.sale_quantity + 15, value.sale_quantity + 7, value.sale_quantity + 20, value.sale_quantity + 4],
-										markPoint: {
-											data: [{
-													type: 'max',
-													name: '最大值'
-												},
-												{
-													type: 'min',
-													name: '最小值'
-												}
-											]
-										},
-										markLine: {
-											data: [{
-												type: 'average',
-												name: '平均值'
-											}]
-										}
-									})
-
-								});
-								showEcharts(legendData.slice(0, 1), seriesData.slice(0, 1), ['1', '2', '3', '4', '5', '6', '7', '8', '9', '2', '3', '4', '5', '6', '7', '8', '9', '2', '3', '4', '5', '6', '7', '8', '9', '2', '3', '4', '5', '6', '7', '8', '9', '2', '3', '4', '5', '6', '7', '8', '9', '2', '3', '4', '5', '6', '7', '8', '9']);
-
-								jQuery(".goods").click(function() {
-									var picker = new mui.PopPicker({
-										layer: 1
+							var dateData = [];
+							var goodsData = [];
+							if(data.code == 0) {
+								data.data.forEach(function(value, index) {
+									legendData.push(value.goodsName);
+									legendData = legendData.filter(function(element, index, self) {
+										return self.indexOf(element) === index;
 									});
-									picker.setData(legendData)
-									picker.pickers[0].setSelectedIndex(0, 1000);
-
-									picker.show(function(SelectedItem) {
-										console.log(JSON.stringify(SelectedItem))
-										var goodsName = SelectedItem[0];
-										jQuery('.goods span').html(goodsName)
-										var index;
-										legendData.forEach(function(val, i) {
-											if(goodsName == val) {
-												index = i;
+								});
+								console.log(legendData);
+								jQuery('#main').css("height", 15 * legendData.length + "px")
+								var asd = ["a0", "a1", "a2", "a3", "a4", "a5", "a6", "a7", "a8", "a9", "a10", "a11", "a12", "a13", "a14", "a15", "a16", "a17", "a18", "a19", "a20", "a21", "a22", "a23", "a24", "a25", "a26", "a27", "a28", "a29", "a30", "a31", "a32", "a33", "a34", "a35", "a36", "a37", "a38", "a39", "a40", "a41", "a42", "a43", "a44", "a45", "a46", "a47", "a48", "a49"];
+								legendData.forEach(function(val, i) {
+									asd[i] = [];
+									data.data.forEach(function(value, index) {
+										if(value.goodsName == val) {
+											var num1, num2;
+											if(value.wechatOrderTotal) {
+												num1 = Number(value.wechatOrderTotal);
+											} else {
+												num1 = 0;
 											}
-										})
+											if(value.alipayOrderTotal) {
+												num2 = Number(value.alipayOrderTotal);
+											} else {
+												num2 = 0;
+											}
+											asd[i].push(num1 + num2);
+											if(i < 1) {
+												if(value.payTime.length > 5) {
+													dateData.push(value.payTime.slice(5));
+												} else {
+													dateData.push(value.payTime);
+												}
+											}
 
-										showEcharts(legendData.slice(index, index + 1), seriesData.slice(index, index + 1), ['1', '2', '3', '4', '5', '6', '7', '8', '9', '2', '3', '4', '5', '6', '7', '8', '9', '2', '3', '4', '5', '6', '7', '8', '9', '2', '3', '4', '5', '6', '7', '8', '9', '2', '3', '4', '5', '6', '7', '8', '9', '2', '3', '4', '5', '6', '7', '8', '9']);
+										}
+
 									})
-								})
+									var totalNum = 0;
+									asd[i].forEach(function(val, i) {
+										totalNum += Number(val);
+									})
+									seriesData.push(totalNum)
+								});
+								console.log(JSON.stringify(asd))
+								console.log(JSON.stringify(seriesData))
+
+								showEcharts(legendData, seriesData, dateData);
 
 								function showEcharts(legendData, seriesData, dateData) {
-									jQuery('.goods span').html(legendData);
-									jQuery('.goods').show();
 									//				echart
 									// 基于准备好的dom，初始化echarts实例
 									var myChart = echarts.init(document.getElementById('main'));
-
-									// 指定图表的配置项和数据
-
-									var option = {
-										dataZoom: [{
-												type: 'slider', //图表下方的伸缩条
-												show: true, //是否显示
-												realtime: true, //
-												start: 0, //伸缩条开始位置（1-100），可以随时更改
-												end: 20, //伸缩条结束位置（1-100），可以随时更改
-											},
-											{
-												type: 'inside', //鼠标滚轮
-												realtime: true,
-												//还有很多属性可以设置，详见文档
-											},
-										],
-										legend: {
-											orient: 'horizontal',
-											x: 'center',
-											top: 0,
-											data: legendData.slice(0, 1)
-										},
-										toolbox: {
+									var seriesLabel = {
+										normal: {
 											show: true,
-											feature: {
-												dataView: {
-													show: true,
-													readOnly: false
-												},
-												magicType: {
-													show: true,
-													type: ['bar', 'line']
-												},
-												restore: {
-													show: true
-												},
-												saveAsImage: {
-													show: true
-												}
+											textBorderColor: '#333',
+											textBorderWidth: 2
+										}
+									}
+									var option = {
+										tooltip: {
+											trigger: 'axis',
+											axisPointer: {
+												type: 'shadow'
 											}
 										},
-										calculable: true,
-										xAxis: [{
-											type: 'category',
-											data: dateData
-										}],
-										yAxis: [{
+										xAxis: {
 											type: 'value'
-										}],
-										series: seriesData.slice(0, 1)
+										},
+										yAxis: {
+											type: 'category',
+											data: legendData
+										},
+
+										grid: {
+											left: '3%',
+											right: '4%',
+											bottom: '3%',
+											containLabel: true
+										},
+										series: [{
+											data: seriesData,
+											label: seriesLabel,
+											type: 'bar'
+
+										}]
 									};
 									// 使用刚指定的配置项和数据显示图表
 									myChart.setOption(option);
 									myChart.on('datazoom', function(params) {
 										//params里面有什么，可以打印出来看一下就明白
-										console.log(JSON.stringify(params));
 										//可以通过params获取缩放的起止百分比，但是鼠标滚轮和伸缩条拖动触发的params格式不同，所以用另一种方法
 										//获得图表数据数组下标
 										var startValue = myChart.getModel().option.dataZoom[0].startValue;
@@ -374,12 +360,11 @@
 										var startPercent = myChart.getModel().option.dataZoom[0].start;
 										var endPercent = myChart.getModel().option.dataZoom[0].end;
 
-
 									})
 									//							自适应
 									window.onresize = myChart.resize;
 								}
-							} else if(data.error == "ERROR_INVALID_TOKEN") {
+							} else if(data.code == 500 && data.msg == "令牌已经失效,请重新登录") {
 								plus.nativeUI.toast('登录信息已过期，请重新登录');
 								mui.openWindow({
 									url: '../../login.html',
@@ -394,7 +379,14 @@
 						error: function(xhr, type, errorThrown) {
 							//异常处理；
 							console.log(type);
-							console.log(JSON.stringify(errorThrown))
+							console.log(JSON.stringify(errorThrown));
+							plus.nativeUI.toast('网络连接错误，请重新登录');
+							mui.openWindow({
+								url: '../../login.html',
+								show: {
+									autoShow: true
+								}
+							});
 						}
 					});
 				}

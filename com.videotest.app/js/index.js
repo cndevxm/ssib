@@ -12,52 +12,53 @@ $(function() {
 	}
 
 	//      获取图片链接
-	getImgUrl()
+	getImgUrl();
 	var baseImagePath;
 
 	function getImgUrl() {
+
 		$.ajax({
-			type: "GET",
 			url: host + "/api/imgserver",
-			contentType: "application/json; charset=utf-8",
+			type: "GET",
+			contentType: "application/json;charset=utf-8",
 			dataType: "json",
 			success: function(result) {
-				baseImagePath = result.object;
-				console.log("baseImagePath+" + baseImagePath);
-				getUrlImg()
+				console.log(JSON.stringify(result))
+				baseImagePath = result.data;
+				console.log(baseImagePath)
 			},
-			error: function(msg) {
-				console.log(msg)
+			error: function(xhr, type, errorThrown) {
+				console.log(xhr)
+				console.log(type)
+				console.log(errorThrown)
 			}
 		});
+
 	};
 
 	//      显示广告
-	function getUrlImg() {
-		if(baseImagePath) {
-			showAds(0);
-		} else {
-			getImgUrl();
-			setTimeout(function() {
-				showAds(0);
-			}, 3000)
-		}
-	}
 
-	function showAds(time) {
-		console.log("showAds")
-		if(time < 1) {
+	if(baseImagePath) {
+		showAds(0);
+	} else {
+
+		setTimeout(function() {
+			if(baseImagePath) {
+				toast("imgUrl:" + baseImagePath)
+			} else {
+				baseImagePath = "http://ssib.gzncloud.com:10053";
+
+			}
 			connectWs(wsHost + "/websocket/ssib/ad?deviceNo=" + deviceNo);
 			showModle()
-		} else {
-			var timer = setTimeout(function() {
-				showModle();
-				clearTimeout(timer);
-			}, time);
-		}
+		}, 1000)
 	}
 
+	var ws;
+
 	function connectWs(target) {
+		console.log(baseImagePath)
+		console.log(target);
 		$.ajax({
 			type: "GET",
 			url: host + "/api/ssib/advert/ws/" + deviceNo,
@@ -65,40 +66,30 @@ $(function() {
 			dataType: "json",
 			success: function(result) {
 				console.log(JSON.stringify(result))
-				alert(JSON.stringify(result))
-//				if(result.success == true) {
 				if(result.code == 0) {
-					console.log(target);
-					var ws = new ReconnectingWebSocket(target);
-
+					ws = new ReconnectingWebSocket(target);
 					ws.onopen = function(e) {
-						console.log("............." + JSON.stringify(e))
 						toast("连接服务器成功");
 					};
 					ws.onerror = function(e) {
-						console.log(JSON.stringify(e))
 						toast("服务器连接出错");
 					};
 
 					//连接关闭的回调方法
 					ws.onclose = function(e) {
 						toast("服务器连接关闭");
-						console.log(JSON.stringify(e))
-						if(e.code === 1003) {
-							self.readyState = WebSocket.CLOSED;
-							eventTarget.dispatchEvent(generateEvent('close'));
-							alert(e.reason);
-							return;
-						}
 					};
 
 					ws.onmessage = function(event) {
 						var result = JSON.parse(event.data);
 						console.log(result);
 						var type = result.type;
+						$('.adsBox').css("width", "100%");
 						if(result.success === false) {
+							$('.adsBox').css("width", "60%")
 							openFail(result.msg);
 						} else if(type === "door") {
+							$('.adsBox').css("width", "60%")
 							var success = result.success;
 							var msg = result.msg;
 							if(success === true) {
@@ -107,25 +98,28 @@ $(function() {
 								openFail(msg);
 							}
 						} else if(type === "opening") {
+							$('.adsBox').css("width", "60%")
 							opening();
 						} else if(type === "update") {
+							$('.adsBox').css("width", "60%")
 							var data = result.data;
 							var amount = data.amount;
 							var list = data.list;
 							updateList(list, amount);
 						} else if(type === "final") {
+							$('.adsBox').css("width", "60%")
 							var data = result.data;
 							var amount = data.amount;
 							var list = data.list;
 							updateList(list, amount);
 							if(list.length == 0) {
 								intHtml();
-							} else {
-								var timer = setTimeout(function() {
-									intHtml();
-									clearTimeout(timer);
-								}, 3000)
 							}
+							var timer = setTimeout(function() {
+								intHtml();
+								clearTimeout(timer);
+								$('.adsBox').css("width", "100%")
+							}, 20000)
 						} else if(type === "ad") {
 							getAds(result);
 							intHtml();
@@ -138,13 +132,15 @@ $(function() {
 						ws.close();
 					}
 				} else {
-					alert(result.msg);
 					localStorage.removeItem("deviceNo");
 					window.location.href = './page/login.html';
+					alert(result.msg);
 				}
 			},
-			error: function(msg) {
-				console.log(msg)
+			error: function(xhr, type, errorThrown) {
+				console.log(xhr)
+				console.log(type)
+				console.log(errorThrown)
 			}
 		});
 	}
@@ -169,10 +165,12 @@ $(function() {
 			$(".literals").text("请选择商品").show();
 		} else {
 			$(".literals").text("").hide();
+			var html = "";
 			if(type == "update") {
-				var html = "";
+				html += "";
 			} else if(type == "final") {
-				var html = '<div class="top1"><p>提示：若出现故障致出货失败，系统将在审核后自动退款</p><img th:src="@{/ssib/image/shoppingCart.png}" src="../../static/ssib/image/shoppingCart.png" alt=""></div>';
+				//				html += '<div class="top1"><p>提示：若出现故障致出货失败，系统将在审核后自动退款</p><img th:src="@{/ssib/image/shoppingCart.png}" src="../../static/ssib/image/shoppingCart.png" alt=""></div>';
+
 			}
 
 			for(var i = 0; i < list.length; i++) {
@@ -184,8 +182,7 @@ $(function() {
 				html += '<div>';
 				html += '<div class="toubuwz">' + goods.name + '</div>';
 				html += '<div>';
-				html += '<span>商品:' + goods.name + '</span>';
-				if(goods.isBulk !== 1) {
+				if(goods.isBulk !== "1") {
 					html += '<span>数量:' + goods.quantity + '</span>';
 					html += '<span>单价:' + goods.price + '</span>';
 				} else {
@@ -202,7 +199,7 @@ $(function() {
 		html += '<p><span>合计:</span>';
 		html += '<span>' + amount + '</span></p>';
 		html += '</div>';
-		
+
 		$(".form").html(html);
 	}
 
@@ -278,55 +275,61 @@ $(function() {
 
 	function getAds(data) {
 		console.log(data);
-		var list = data.data.linkUrl;
 		var html = "";
 
 		if(data.data.type == "1") {
+			var list = data.data.linkUrl;
 			if(list) {
-				html = '<div style="width: 100%;height:100%;"><video id="my-video" style="width: 100%; height:100%; background: rgba(100,0,0,0.9); object-fit:fill;"  autoplay="autoplay" preload="none" ><source src="' + baseImagePath + list + '" type="video/mp4"><p class="vjs-no-js"></p></video></div>';
+				html = '<div style="width: 100%;height:100%;"><video id="my-video" style="width: 100%; height:100%; background: rgba(0,0,0,0); object-fit:fill;"  autoplay="autoplay" preload="none" ><source src="' + baseImagePath + list + '" type="video/mp4"><p class="vjs-no-js"></p></video></div>';
 			} else {
-				html = '<div style="width: 100%;height:100%;"><video id="my-video" style="width: 100%; height:100%; background: rgba(100,0,0,0.9); object-fit:fill;"  autoplay="autoplay" preload="none" ><source src="img/movie1.mp4" type="video/mp4"><p class="vjs-no-js"></p></video></div>';
+				html = '<div style="width: 100%;height:100%;"><video id="my-video" style="width: 100%; height:100%; background: rgba(0,0,0,0); object-fit:fill;"  autoplay="autoplay" preload="none" ><source src="img/movie1.mp4" type="video/mp4"><p class="vjs-no-js"></p></video></div>';
 			}
+			$(".carousel-inner").html(html)
+			setTimeout(function() {
+				videojs("my-video").ready(function() {
+					var myPlayer = this;
+					myPlayer.play();
+					myPlayer.on("ended", function() {
+						myPlayer.play();
+						var timer = this.currentTime() * 1000;
+						var time1 = setInterval(function() {
+							myPlayer.play();
+							clearInterval(time1);
+						}, timer)
+					});
+				});
+			}, 3000)
 
-		} else {
+		} else if(data.data.type == "0") {
+			var list = data.data.linkUrl.split(",");
+			console.log(list)
 			for(var i = 0; i < list.length; i++) {
-				var item = list[i];
-				if(item.type == 0) {
-					var urllist = item.linkUrl.split(",");
-					for(var j = 0; j < urllist.length; j++) {
-						html += '<div class="swiper-slide"><img src="' + baseImagePath + urllist[j] + '" ></div>';
-					}
+				if(i < 1) {
+					html += '<div class="item active"><img src="' + baseImagePath + list[i] + '"></div>'
+				} else {
+					html += '<div class="item"><img src="' + baseImagePath + list[i] + '"></div>'
 				}
 			}
+			$(".carousel-inner").html(html)
+		} else {
+
+			$(".carousel-inner").html('<div style="width: 100%;height:100%;"><video id="my-video" style="width: 100%; height:100%; background: rgba(0,0,0,0); object-fit:fill;"  autoplay="autoplay" preload="none" ><source src="img/movie1.mp4" type="video/mp4"><p class="vjs-no-js"></p></video></div>');
+
+			setTimeout(function() {
+				videojs("my-video").ready(function() {
+					var myPlayer = this;
+					myPlayer.play();
+					myPlayer.on("ended", function() {
+						myPlayer.play();
+						var timer = this.currentTime() * 1000;
+						var time1 = setInterval(function() {
+							myPlayer.play();
+							clearInterval(time1);
+						}, timer)
+					});
+				});
+			}, 3000)
 		}
 
-		$(".swiper-wrapper").html(html);
-		if(!($(".swiper-wrapper").html())) {
-			$(".swiper-wrapper").html('<div style="width: 100%;height:100%;"><video id="my-video" style="width: 100%; height:100%; background: rgba(100,0,0,0.9); object-fit:fill;"  autoplay="autoplay" preload="none" ><source src="img/movie1.mp4" type="video/mp4"><p class="vjs-no-js"></p></video></div>');
-		}
-		var myPlayer = videojs('my-video');
-		videojs("my-video").ready(function() {
-			var myPlayer = this;
-			myPlayer.play();
-			myPlayer.on("ended", function() {
-				myPlayer.play();
-				var timer = this.currentTime() * 1000;
-				console.log(timer);
-				var time1 = setInterval(function() {
-					myPlayer.play();
-					clearInterval(time1);
-				}, timer)
-			});
-		});
-		var swiper = new Swiper('.swiper-container', {
-			pagination: '.swiper-pagination',
-			paginationClickable: true,
-			autoplay: 3000,
-			autoplayDisableOnInteraction: false,
-			nextButton: '.swiper-button-next',
-			prevButton: '.swiper-button-prev',
-			loop: true,
-			speed: 500,
-		})
 	}
 });

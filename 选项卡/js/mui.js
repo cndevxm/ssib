@@ -8,10 +8,10 @@
  * @type _L4.$|Function
  */
 
-var url="http://xzh2.free.ngrok.cc";
-var wsHost="ws://xzh2.free.ngrok.cc";
-var url="http://192.168.0.135:8081";
-var wsHost="ws://192.168.0.135:8081";
+var url="http://xzh2.free.idcfengye.com";
+var wsHost="ws://xzh2.free.idcfengye.com";
+var url="http://192.168.0.135:8088";
+var wsHost="ws://192.168.0.135:8088";
 //var url="http://ssib.gzncloud.com";
 //var wsHost="ws://ssib.gzncloud.com";
 var imgUrl="http://ssib.gzncloud.com:10053";

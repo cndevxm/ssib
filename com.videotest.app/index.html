@@ -1,69 +1,76 @@
 <!DOCTYPE html>
 <html>
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
-    <title></title>
-    <script src="js/mui.min.js"></script>
-    <link href="css/mui.min.css" rel="stylesheet"/>
-    <link rel="stylesheet" type="text/css" href="css/index.css">
-    <link rel="stylesheet" href="css/swiper-3.4.2.min.css">
-    <link href="./css/video-js.css" rel="stylesheet">
-    <title>易购智能</title>
-    <style type="text/css">
-    	   .top1 {
-            width: 100%;
-            height: auto;
-            padding: 20px;
-            background-color: #E84C26;
-            text-align: center;
-            box-sizing: border-box;
-        }
 
-        .top1 p {
-            width: 100%;
-            height: auto;
-            line-height: 18px;
-            font-size: 10px;
-            color: #F8F8F8;
-        }
-
-        .top1 img {
-            height: auto;
-            width: 30%;
-            margin: 10px auto;
-        }
-
-        
-    </style>
-   <script type="text/javascript" charset="utf-8">
-	mui.init();
-	mui.ready(function() {
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<title></title>
+		<script src="js/mui.min.js"></script>
+		<link href="css/mui.min.css" rel="stylesheet" />
+		<link rel="stylesheet" type="text/css" href="css/index.css">
+		<link href="./css/video-js.css" rel="stylesheet">
+		<link rel="stylesheet" type="text/css" href="css/bootstrap.min.css" />
+		<title>易购智能</title>
+		<style type="text/css">
+			.top1 {
+				width: 100%;
+				height: auto;
+				padding: 20px;
+				background-color: #E84C26;
+				text-align: center;
+				box-sizing: border-box;
+			}
+			
+			.top1 p {
+				width: 100%;
+				height: auto;
+				line-height: 18px;
+				font-size: 10px;
+				color: #F8F8F8;
+			}
+			
+			.top1 img {
+				height: auto;
+				width: 30%;
+				margin: 10px auto;
+			}
+			
+		</style>
+		<script type="text/javascript" charset="utf-8">
+			mui.init();
+			mui.ready(function() {
 				//				 在这里调用plus api 锁定横屏 全屏 获取Mac
 				mui.plusReady(function() {
 					plus.screen.lockOrientation("landscape-primary");
 				})
 			})
-</script>
-</head>
-<body>
-<div class="content">
-    <img class="imgStates" src="img/opening.png">
-    <h1 class="literals">欢迎光临</h1>
-    <div class="form">
-    </div>
-</div>
+		</script>
+	</head>
 
-<div class="adsBox">
-    <div class="swiper-container">
-        <div class="swiper-wrapper" style="width: 100%;height:100%; "></div>
-    </div>
-</div>
-<div class="toast" ></div>
-</body>
-<script src="js/jquery.min.js"></script>
-<script src="./js/video.min.js"></script>
-<script src="js/swiper-3.4.2.jquery.min.js"></script>
-<script src="js/reconnecting-websocket.js"></script>
-<script type="text/javascript" src="js/index.js"></script>
+	<body>
+		<div class="content">
+			<img class="imgStates" src="img/opening.png">
+			<h1 class="literals">欢迎光临</h1>
+			<div class="form">
+			</div>
+		</div>
+
+		<div class="adsBox">
+			<div id="carousel-example-generic" class="carousel slide" data-ride="carousel">
+			
+			<div class="carousel-inner" role="listbox">
+				
+			</div>
+		</div>
+		</div>
+		<div class="toast"></div>
+
+		
+	</body>
+	<script src="js/jquery.min.js"></script>
+	<script src="js/video.min.js"></script>
+	<script src="js/reconnecting-websocket.js"></script>
+	<script type="text/javascript" src="js/index.js"></script>
+	<script src="js/bootstrap.min.js" type="text/javascript" charset="utf-8"></script>
+
 </html>

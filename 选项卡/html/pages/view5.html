@@ -60,33 +60,10 @@
 				var arr1 = arr2 = arr3 = [];
 				deviceMsg.forEach(function(val, index) {
 					//					console.log(JSON.stringify(val), index, this);
-					console.log(val.is_online == 0)
-					var state, type, city = "";
-					if(val.state == 0) {
-						state = "在线";
-					} else {
-						state = "离线";
-					}
-					if(val.type == 1) {
-						type = "弹簧柜";
-					} else if(val.type == 2) {
-						type = "RFID柜";
-					} else if(val.type == 3) {
-						type = "重力柜";
-					}
-
-					if(val.province + val) {
-						city += val.province;
-					}
-					if(val.city) {
-						city += val.city;
-					}
-					if(val.disctinct) {
-						city += val.disctinct;
-					}
-					html = '<li class="mui-table-view-cell mui-transitioning"><div class="mui-slider-right mui-disabled"><a class="mui-btn mui-btn-grey" style="transform: translate(0px, 0px);">补货</a><a class="mui-btn mui-btn-yellow" style="transform: translate(-90px, 0px);">查看原因</a><a class="mui-btn mui-btn-red" style="transform: translate(-180px, 0px);">解除状态</a></div><div class="mui-slider-handle" style="transform: translate(0px, 0px);"><div class="mui-table-cell">' + val.number + '</div></div></li>';
 					
-						if(val.is_online == 1) {
+					var html = '<li class="mui-table-view-cell mui-transitioning"><div class="mui-slider-right mui-disabled"><a class="mui-btn mui-btn-grey" style="transform: translate(0px, 0px);">补货</a><a class="mui-btn mui-btn-yellow" style="transform: translate(-90px, 0px);">查看原因</a><a class="mui-btn mui-btn-red" style="transform: translate(-180px, 0px);">解除状态</a></div><div class="mui-slider-handle" style="transform: translate(0px, 0px);"><div class="mui-table-cell">' + val.number + '</div></div></li>';
+					
+						if(val.isOnline == 0) {
 							total++; 
 							if(val.type == 1) {
 								device1++;
