@@ -204,6 +204,7 @@
 			/*问题反馈在setting页面单独的css==end*/
 		</style>
 		<link rel="stylesheet" type="text/css" href="../css/feedback.css" />
+		<link rel="stylesheet" type="text/css" href="../css/mui.picker.min.css" />
 	</head>
 
 	<body class="mui-fullscreen">
@@ -269,6 +270,10 @@
 							<li class="mui-table-view-cell" style="text-align: center;">
 								<a id="closeApp">退出</a>
 							</li>
+							<br />
+							<li class="mui-table-view-cell" style="text-align: center;">
+								<a id="jpush">jpush</a>
+							</li>
 						</ul>
 					</div>
 				</div>
@@ -295,7 +300,7 @@
 								</a>
 							</li>
 							<li class="mui-table-view-cell">
-								<a>姓名<span class="mui-pull-right userName"></span></a>
+								<a>姓名<span class="mui-pull-right username"></span></a>
 							</li>
 							<li class="mui-table-view-cell">
 								<a>账号<span class="mui-pull-right loginName"></span></a>
@@ -574,6 +579,8 @@
 	<script src="../js/mui.min.js "></script>
 	<script src="../js/mui.view.js "></script>
 	<script src='../js/feedback.js'></script>
+		<script src="../js/mui.picker.min.js" type="text/javascript" charset="utf-8"></script>
+	<script src="../js/jquery-3.2.1.min.js" type="text/javascript" charset="utf-8"></script>
 	<script>
 		mui.init();
 		//初始化单页view
@@ -939,7 +946,14 @@
 					}
 				});
 			})
-			mui.ajax(url + "/api/app/user/info?token=" + localStorage.getItem("token"), {
+			//jpush
+			document.getElementById("jpush").addEventListener("tap", function(event) {
+				mui.openWindow({
+					url: 'jpush.html'
+					
+				});
+			})
+			mui.ajax(url + "/app/user/info?token=" + localStorage.getItem("token"), {
 				type: 'post', //HTTP请求类型
 				async: false,
 				data: {

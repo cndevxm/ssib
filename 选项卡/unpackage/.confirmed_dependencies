@@ -1,67 +1,77 @@
 {
-	"index.html": {
-		"resources": [
-			"html/device.html"
-		],
-		"refer": [
-			"html/device.html",
-			"html/stats.html",
-			"html/my.html",
-			"login.html",
-			"html/pages/view1.html",
-			"html/pages/view2.html",
-			"html/pages/view3.html",
-			"html/pages/view5.html",
-			"html/pages/view4.html"
-		]
-	},
-	"html/my.html": {
-		"refer": [
-			"login.html"
-		]
-	},
-	"html/stats.html": {
-		"refer": [
-			"html/pages/stats2.html",
-			"html/pages/stats3.html",
-			"html/pages/stats1.html"
-		]
-	},
-	"html/pages/view1.html": {
-		"refer": [
-			"html/view.html"
-		]
-	},
-	"html/pages/view2.html": {
-		"refer": [
-			"html/view.html"
-		]
-	},
-	"html/view.html": {
-		"refer": [
-			"html/replenishment.html",
-			"login.html"
-		]
-	},
-	"html/pages/view5.html": {
-		"refer": [
-			"html/view.html"
-		]
-	},
-	"html/device.html": {
-		"refer": [
-			"html/qrcode.html",
-			"html/view.html"
-		]
-	},
-	"html/pages/stats1.html": {
-		"refer": [
-			"login.html"
-		]
-	},
-	"html/pages/stats2.html": {
-		"refer": [
-			"login.html"
-		]
-	}
+  "index.html": {
+    "resources": [
+      "html/device.html"
+    ],
+    "refer": [
+      "html/device.html",
+      "html/stats.html",
+      "html/my.html",
+      "login.html",
+      "html/pages/view1.html",
+      "html/pages/view2.html",
+      "html/pages/view3.html",
+      "html/pages/view5.html",
+      "html/pages/view4.html"
+    ]
+  },
+  "html/my.html": {
+    "refer": [
+      "login.html",
+      "html/jpush.html"
+    ],
+    "resources": []
+  },
+  "html/stats.html": {
+    "refer": [
+      "html/pages/stats2.html",
+      "html/pages/stats3.html",
+      "html/pages/stats1.html"
+    ],
+    "resources": []
+  },
+  "html/pages/view1.html": {
+    "refer": [
+      "html/view.html"
+    ],
+    "resources": []
+  },
+  "html/pages/view2.html": {
+    "refer": [
+      "html/view.html"
+    ],
+    "resources": []
+  },
+  "html/view.html": {
+    "refer": [
+      "html/replenishment.html",
+      "login.html"
+    ],
+    "resources": []
+  },
+  "html/pages/view5.html": {
+    "refer": [
+      "html/view.html"
+    ],
+    "resources": []
+  },
+  "html/device.html": {
+    "refer": [
+      "html/qrcode.html",
+      "html/view.html"
+    ],
+    "resources": []
+  },
+  "html/pages/stats1.html": {
+    "refer": [
+      "login.html"
+    ],
+    "resources": []
+  },
+  "html/pages/stats2.html": {
+    "refer": [
+      "login.html"
+    ],
+    "resources": []
+  }
 }

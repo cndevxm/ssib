@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="MobileOptimized" content="320"/>
+    <title>JPush HBuilder Demo</title>
+    <!--<link href="https://cdn.staticfile.org/jquery-mobile/1.4.5/jquery.mobile.css" rel="stylesheet"/>-->
+    <script src="../js/jquery-3.2.1.min.js"></script>
+    <!--<script src="https://cdn.staticfile.org/jquery-mobile/1.4.5/jquery.mobile.js"></script>-->
+    <script src="../js/common.js"></script>
+    <script src="../js/jpush.js"></script>
+    <script type="text/javascript">
+    var setTagsWithAlias = function () {
+
+      var tag1 = $("#tagText1").val()
+      var tag2 = $("#tagText2").val()
+      var tag3 = $("#tagText3").val()
+      var alias = $("#aliasText").val()
+      var tags = []
+
+      if (tag1 != "") {
+        tags.push(tag1)
+      }
+      if (tag2 != "") {
+        tags.push(tag2)
+      }
+      if (tag3 != "") {
+        tags.push(tag3)
+      }
+      plus.Push.setTagsWithAlias(tags, alias)
+    }
+
+    var getRegistrationID = function () {
+      plus.Push.getRegistrationID(function (data) {
+        if (data.length != 0) {
+          $("#registrationID").html(data)
+        }
+      })
+    }
+
+    var getLaunchAppCacheNotification = function () {
+      if (plus.os.name == 'Android') {
+         plus.Push.getLaunchAppCacheNotification(function (data) {
+           if (data.alert) {
+             $("#notificationResult").html("cache:"+data.alert)
+           }
+         })
+      }
+    }
+
+    var receiveNotification = function (event) {
+      var content
+      if (plus.os.name == 'iOS') {
+        content = window.plus.Push.receiveNotification.aps.alert
+      } else {
+        content = window.plus.Push.receiveNotification.alert
+      }
+
+      $("#notificationResult").html(content)
+    }
+
+    var openNotification = function () {
+      var content
+      if (plus.os.name == 'iOS') {
+        content = plus.Push.openNotification.aps.alert
+      } else {
+        content = plus.Push.openNotification.alert
+        plus.Push.clearLaunchAppCacheNotification();
+      }
+      $("#notificationResult").html(content)
+    }
+
+    var receiveMessage = function () {
+      var msg
+      if (plus.os.name == 'iOS') {
+        msg = plus.Push.receiveMessage.content
+      } else {
+        msg = plus.Push.receiveMessage.message
+      }
+
+      $("#messageResult").html(msg)
+    }
+
+    var onAliasAndTagsSet = function (event) {
+      var result = "result code: " + event.arguments.resultCode + " "
+      result += "tags: " + event.arguments.tags + " "
+      result += "alias: " + event.arguments.alias + " "
+      alert(result)
+      $("#tagAliasResult").html(result)
+    }
+
+    var init = function () {
+      plus.Push.init()
+      getLaunchAppCacheNotification()
+    }
+
+
+
+    document.addEventListener("plusready", init, false)
+    document.addEventListener("jpush.receiveMessage", receiveMessage, false)
+    document.addEventListener("jpush.receiveNotification", receiveNotification, false)
+    document.addEventListener("jpush.openNotification", openNotification, false)
+    document.addEventListener("jpush.setTagsWithAlias", onAliasAndTagsSet, false)
+
+
+    var onOpenNotification = function(event) {
+      var alertContent;
+      if(plus.os.name == "Android") {
+          alertContent = window.plus.Push.openNotification.alert;
+      } else {
+          alertContent = event.aps.alert;
+      }
+      alert("Open notification:" + alertContent);
+
+    }
+
+    document.addEventListener("jpush.openNotification", onOpenNotification, false);
+
+    </script>
+</head>
+
+<body>
+<div data-role="page" id="page">
+    <div data-role="content">
+        <form>
+            <div class="ui-body ui-body-b">
+                <div data-role="fieldcontain">
+                    <h3 align="center">JPush Example</h3>
+                    <span id="alias"></span>
+                    <hr/>
+                    <label>RegistrationID: </label>
+                    <label id="registrationID">null</label>
+                </div>
+
+                <div data-role="fieldcontain">
+                    <label>Tags: </label>
+                    <table>
+                        <tr>
+                            <td>
+                                <input type="text" id="tagText1"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <input type="text" id="tagText2"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <input type="text" id="tagText3">
+                            </td>
+                        </tr>
+                    </table>
+                    <label>Alias: </label>
+                    <table>
+                        <tr>
+                            <td>
+                                <input type="text" id="aliasText">
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div data-role="fieldcontain">
+                    <input type="button" value="Add tag and alias" onclick="setTagsWithAlias()"/>
+
+                    <input type="button" onclick="plus.Push.addLocalNotification(0,
+            		'local notification', 'title', 1, 0, null)" value="Add local notification"/>
+
+                    <input type="button" onclick="getRegistrationID()" value="Get registration ID"/>
+                </div>
+
+                <div data-role="fieldcontain">
+                    <label id="tagAliasPrompt">设置tag/alias结果:</label>
+                    <label id="tagAliasResult">null</label>
+                </div>
+
+                <div data-role="fieldcontain">
+                    <label id="notificationPrompt">接受的通知内容:</label>
+                    <label id="notificationResult">null</label>
+                </div>
+
+                <div data-role="fieldcontain">
+                    <label id="messagePrompt">接受的自定义消息:</label>
+                    <label id="messageResult">null</label>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+</body>
+</html>

@@ -504,7 +504,8 @@
 					"js/mui.view.js"
 				],
 				"refer": [
-					"login.html"
+					"login.html",
+					"html/jpush.html"
 				],
 				"priority": 0
 			},

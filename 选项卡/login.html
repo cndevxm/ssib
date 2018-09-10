@@ -89,7 +89,7 @@
 					document.getElementById("clear").addEventListener("tap", function(event) {
 						localStorage.clear();
 						//登出
-						//						mui.ajax(url + "/api/app/user/logout", {
+						//						mui.ajax(url + "/app/user/logout", {
 						//							data: {
 						//								username: accountBox.value,
 						//								password: passwordBox.value
@@ -154,8 +154,7 @@
 					loginButton.addEventListener('tap', function(event) {
 						//			ajax
 						console.log(accountBox.value);
-						console.log(url + "/api/app/user/login");
-						mui.ajax(url + "/api/app/user/login", {
+						mui.ajax(url + "/app/user/login", {
 							data: {
 								username: accountBox.value,
 								password: passwordBox.value
@@ -171,28 +170,75 @@
 								console.log(JSON.stringify(data));
 
 								if(data.code == 0) {
-
 									localStorage.setItem("token", data.data);
+									mui.ajax(url + "/app/user/info?token=" + data.data, {
+										type: 'post', //HTTP请求类型
+										async: false,
+										data: {
 
-									//									清除view
-									var vw_list = plus.webview.all();
-									for(var i = 0, len = vw_list.length; i < len; i++) {
-										var ws = plus.webview.getWebviewById(vw_list[i].id);
-										var length = vw_list[i].id.length - 10;
-										if(vw_list[i].id == "HBuilder") {
-											setTimeout(function() {
-												var index = plus.webview.getLaunchWebview();
-												index.reload();
-											}, 50)
-										} else if(vw_list[i].id.slice(length) == "login.html") {
-											plus.webview.hide(ws)
-											setTimeout(function() {
-												plus.webview.close(ws);
-											}, 50)
-										} else {
-											plus.webview.close(ws);
+										},
+										dataType: 'json', //服务器返回json格式数据
+										timeout: 10000, //超时时间设置为10秒；
+										headers: {
+											'Content-Type': 'application/json'
+										},
+										success: function(data) {
+											//服务器返回响应，根据响应结果，分析是否登录成功；
+											console.log(JSON.stringify(data));
+											if(data.code == 0) {
+//												var setTagsWithAlias = function() {
+//													plus.Push.setTagsWithAlias([], data.userId)
+//												}
+//												document.addEventListener("jpush.setTagsWithAlias", onAliasAndTagsSet, false);
+//												var onAliasAndTagsSet = function(event) {
+//													var result = "result code: " + event.arguments.resultCode + " "
+//													result += "tags: " + event.arguments.tags + " "
+//													result += "alias: " + event.arguments.alias + " "
+//													mui.toast("别名设置成功，" + result); 
+//												}
+													var vw_list = plus.webview.all();
+													for(var i = 0, len = vw_list.length; i < len; i++) {
+														var ws = plus.webview.getWebviewById(vw_list[i].id);
+														var length = vw_list[i].id.length - 10;
+														if(vw_list[i].id == "HBuilder") {
+															setTimeout(function() {
+																var index = plus.webview.getLaunchWebview();
+																index.reload();
+															}, 50)
+														} else if(vw_list[i].id.slice(length) == "login.html") {
+															plus.webview.hide(ws)
+															setTimeout(function() {
+																plus.webview.close(ws);
+															}, 50)
+														} else {
+															plus.webview.close(ws);
+														}
+													}
+											} else if(data.code == 500 && data.msg == "令牌已经失效,请重新登录") {
+												plus.nativeUI.toast('网络连接错误，请重新登录');
+												mui.openWindow({
+													url: '../login.html',
+													show: {
+														autoShow: true
+													}
+												});
+											} else {
+												alert(data.msg)
+											}
+										},
+										error: function(xhr, type, errorThrown) {
+											//异常处理；
+											console.log(type);
+											plus.nativeUI.toast('网络连接错误，请重新登录');
+											mui.openWindow({
+												url: '../login.html',
+												show: {
+													autoShow: true
+												}
+											});
 										}
-									}
+									});
+
 								} else if(data.code != 0) {
 									alert("token获取失败")
 								} else {

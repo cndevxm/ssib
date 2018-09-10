@@ -75,7 +75,7 @@
 				if(type == "弹簧柜") {
 					jQuery('.mui-btn-block,.aaa').css("display", "none")
 					var arr = [];
-					mui.ajax(url + "/api/app/aisle/aisleManage?deviceNo="+number+"&cabinetNo="+cabinetNo+"&token=" + localStorage.getItem("token"), {
+					mui.ajax(url + "/app/aisle/aisleManage?deviceNo="+number+"&cabinetNo="+cabinetNo+"&token=" + localStorage.getItem("token"), {
 						data: {
 							
 						},
@@ -143,7 +143,7 @@
 
 						//连接成功建立的回调方法
 						ws.onopen = function(e) {
-							mui.ajax(url + '/api/app/replenish/door?deviceNo=' + number + "&token=" + localStorage.getItem("token"), {
+							mui.ajax(url + '/app/replenish/door?deviceNo=' + number + "&token=" + localStorage.getItem("token"), {
 
 								dataType: 'json', //服务器返回json格式数据
 								type: 'get', //HTTP请求类型

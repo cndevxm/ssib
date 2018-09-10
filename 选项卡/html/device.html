@@ -302,7 +302,7 @@
 						deviceData = JSON.parse(deviceData);
 					} else {
 
-						mui.ajax(url + "/api/app/device/query?token=" + localStorage.getItem("token"), {
+						mui.ajax(url + "/app/device/query?token=" + localStorage.getItem("token"), {
 							data: {},
 							dataType: 'json', //服务器返回json格式数据
 							type: 'post', //HTTP请求类型

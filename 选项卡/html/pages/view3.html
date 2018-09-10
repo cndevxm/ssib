@@ -101,7 +101,7 @@
 					var deviceNo=jQuery(this).parent("div").siblings(".mui-slider-handle").find("div").html();
 					var cabinetNo=1;
 					jQuery.ajax({
-						url:url + "/api/app/aisle/goodsManage/fillCabinet?token=" + localStorage.getItem("token"), 
+						url:url + "/app/aisle/goodsManage/fillCabinet?token=" + localStorage.getItem("token"), 
 						data: {
 							deviceNo: deviceNo,
 							cabinetNo: cabinetNo
@@ -153,7 +153,7 @@
 					var cabinetNo=1;
 					console.log(deviceNo)
 					jQuery.ajax({
-						url:url + "/api/app/aisle/goodsManage/emptyCabinet?token=" + localStorage.getItem("token"),
+						url:url + "/app/aisle/goodsManage/emptyCabinet?token=" + localStorage.getItem("token"),
 						data: {
 							deviceNo: deviceNo,
 							cabinetNo: cabinetNo
